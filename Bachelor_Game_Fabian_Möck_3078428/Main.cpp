@@ -6,12 +6,14 @@
 
 #include <iostream>
 #include "Shader.h"
+#include "Camera.h"
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -58,6 +60,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
+    //vertices for each cube (each side)
     float vertices[] = {
     -0.5f, -0.5f, -0.5f,
      0.5f, -0.5f, -0.5f,
@@ -102,6 +105,7 @@ int main()
     -0.5f,  0.5f, -0.5f
     };
 
+    //position of each cube (worldspace)
     glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(2.0f,  5.0f, -15.0f),
@@ -113,6 +117,20 @@ int main()
     glm::vec3(1.5f,  2.0f, -2.5f),
     glm::vec3(1.5f,  0.2f, -1.5f),
     glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
+    //color of each cube
+    glm::vec3 cubeColors[] = {
+    glm::vec3(1.0f, 1.0f, 1.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(1.0f, 0.0f, 0.0f),
+    glm::vec3(0.0f, 1.0f, 0.0f),
+    glm::vec3(0.0f, 0.0f, 1.0f),
+    glm::vec3(1.0f, 1.0f, 0.0f),
+    glm::vec3(1.0f, 0.0f, 1.0f),
+    glm::vec3(0.0f, 1.0f, 1.0f),
+    glm::vec3(0.5f, 0.5f, 0.5f),
+    glm::vec3(0.2f, 0.7f, 0.5f)
     };
 
     unsigned int indices[] = {
@@ -170,9 +188,18 @@ int main()
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 
             int modelloc = glGetUniformLocation(shader.ID, "model");
             glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+            //set color for cubes
+            float r = cubeColors[i].x;
+            float g = cubeColors[i].y;
+            float b = cubeColors[i].z;
+            int vertexcolor = glGetUniformLocation(shader.ID, "color");
+            glUniform3f(vertexcolor, r,g,b);
+
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -185,11 +212,7 @@ int main()
         glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
 
         int projectloc = glGetUniformLocation(shader.ID, "projection");
         glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
