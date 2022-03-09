@@ -6,16 +6,35 @@
 
 #include <iostream>
 #include "Shader.h"
-#include "Camera.h"
 
+//overloading << for vec3
+std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
+std::ostream& operator<<(std::ostream& os, const glm::vec3 vec)
+{
+    os << vec.x << "/" << vec.y << "/" << vec.z;
+    return os;
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+//input
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
+//color
+glm::vec3 RGB(float _R, float _G, float _B);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+//VAO
+void createCubeVAO();
+void createPlaneVAO();
+unsigned int CUBE_VAO;
+unsigned int PLANE_VAO;
+
+glm::vec3* initMap(glm::vec2 mapSize);
+glm::vec3* initMap(int mapSizeX, int mapSizeY);
+
+glm::vec3 cameraPos = glm::vec3(15.0f, 10.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -60,54 +79,9 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    //vertices for each cube (each side)
-    float vertices[] = {
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-    -0.5f,  0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-
-    -0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-
-    -0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f, -0.5f,
-
-    -0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f, -0.5f
-    };
-
-    //position of each cube (worldspace)
+    //cube
     glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f,  0.0f,  0.0f),
+    //glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(2.0f,  5.0f, -15.0f),
     glm::vec3(-1.5f, -2.2f, -2.5f),
     glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -118,8 +92,6 @@ int main()
     glm::vec3(1.5f,  0.2f, -1.5f),
     glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-
-    //color of each cube
     glm::vec3 cubeColors[] = {
     glm::vec3(1.0f, 1.0f, 1.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
@@ -133,30 +105,15 @@ int main()
     glm::vec3(0.2f, 0.7f, 0.5f)
     };
 
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
+    //plane
+    glm::vec2 mapSize = glm::vec2(10, 10);
+    glm::vec3* planePosition = initMap(mapSize);
+
+    glm::vec3 planeColor = RGB(17.0f, 138.0f, 19.0f);      //currently not working
 
     //vertex input into buffer
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    createCubeVAO();
+    createPlaneVAO();
 
     //render loop
     while (!glfwWindowShouldClose(window)) {                    //keep window running till it gets told to close
@@ -181,8 +138,8 @@ int main()
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++)
+        glBindVertexArray(CUBE_VAO);
+        for (unsigned int i = 0; i < 9; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
@@ -201,6 +158,25 @@ int main()
             glUniform3f(vertexcolor, r,g,b);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        glBindVertexArray(PLANE_VAO);
+        for (unsigned int i = 0; i < mapSize.x * mapSize.y; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, planePosition[i]);
+            float angle = 90;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+
+            int modelloc = glGetUniformLocation(shader.ID, "model");
+            glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+            float r = planeColor.x;
+            float g = planeColor.y;
+            float b = planeColor.z;
+            int vertexcolor = glGetUniformLocation(shader.ID, "color");
+            glUniform3f(vertexcolor, r, g, b);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
         //camera
@@ -224,8 +200,9 @@ int main()
         glfwPollEvents();                                       //check for any event happening in the window, e.g input
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+
+    glDeleteVertexArrays(1, &CUBE_VAO);
+    glDeleteVertexArrays(1, &PLANE_VAO);
     shader.deleteShader();                      //delete Shader
 
     glfwTerminate();                                    //disconnect GLFW
@@ -290,4 +267,143 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         fov = 1.0f;
     if (fov > 45.0f)
         fov = 45.0f;
+}
+
+glm::vec3 RGB(float _R, float _G, float _B) {
+    float r = _R / 255;
+    float g = _G / 255;
+    float b = _B / 255;
+
+    return glm::vec3(r, g, b);
+}
+
+void createCubeVAO()
+{
+    //vertices for each cube (each side)
+    float cubeVertices[] = {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f
+    };
+
+    unsigned int indices[] = {
+    0, 1, 3, // first triangle
+    1, 2, 3  // second triangle
+    };
+
+    unsigned int VBO, EBO;
+    glGenVertexArrays(1, &CUBE_VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(CUBE_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &VBO);
+}
+
+void createPlaneVAO()
+{
+    float planeVertices[] = {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    };
+
+    unsigned int indices[] = {
+    0, 1, 3, // first triangle
+    1, 2, 3  // second triangle
+    };
+
+    unsigned int VBO, EBO;
+    glGenVertexArrays(1, &PLANE_VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(PLANE_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &VBO);
+}
+
+glm::vec3* initMap(glm::vec2 mapSize)
+{
+    glm::vec3* planePosition;
+    planePosition = new glm::vec3[mapSize.x * mapSize.y];
+    int count = 0;
+    for (unsigned int i = 0; i < mapSize.x; i++)
+    {
+        for (unsigned int j = 0; j < mapSize.y; j++)
+        {
+            planePosition[count] = glm::vec3(0.0f + i, 0.0f, 0.0f + j);
+            count++;
+        }
+    }
+    return planePosition;
+}
+
+glm::vec3* initMap(int mapSizeX, int mapSizeY)
+{
+    return initMap(glm::vec2(mapSizeX, mapSizeY));
 }

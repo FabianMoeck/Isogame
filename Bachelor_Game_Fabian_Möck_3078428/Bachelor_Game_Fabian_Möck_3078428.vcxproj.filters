@@ -19,9 +19,6 @@
     <Filter Include="Source Files\Shader">
       <UniqueIdentifier>{a00eeb49-ce6b-4082-a2be-ded5c4e59f78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\GameObjects">
-      <UniqueIdentifier>{7c27cf66-78ec-4dd5-9290-421ef87391ee}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -37,12 +34,6 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Source Files\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>Source Files\GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Source Files\GameObjects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
