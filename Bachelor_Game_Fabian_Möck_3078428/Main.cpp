@@ -7,6 +7,12 @@
 #include <iostream>
 #include "Shader.h"
 
+#define SCREENWIDTH 800
+#define SCREENHIGHT 600
+
+#define MAPSIZE_X 10
+#define MAPSIZE_Y 10
+
 //overloading << for vec3
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec)
@@ -23,7 +29,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 //color
-glm::vec3 RGB(float _R, float _G, float _B);
+glm::vec3 RGB(float _R, float _G, float _B);                //convert any RGB value into a range from 0-1
 
 //VAO
 void createCubeVAO();
@@ -38,12 +44,12 @@ glm::vec3 cameraPos = glm::vec3(15.0f, 10.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
+enum class Direction {forward, back, right, left};
+void moveCamera(Direction direction);
+
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-bool firstMouse = true;
-float lastX = 400, lastY = 300;     //position of the mouse (middle of the window)
-float pitch, yaw = -90.0f;
 float fov = 45.0f;
 
 int main()
@@ -53,7 +59,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Test Window", NULL, NULL);        //create Window (width, height, name, monitor, share)
+    GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHIGHT, "ISO Game", NULL, NULL);        //create Window (width, height, name, monitor, share)
 
     if (window == NULL) {                                       //check if window was created
         std::cout << "Failed to create window" << std::endl;
@@ -67,7 +73,7 @@ int main()
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);                                     //set size for window
+    glViewport(0, 0, SCREENWIDTH, SCREENHIGHT);                                     //set size for window
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);          //set a call for a method if window gets resized
 
     //mouseCallback
@@ -75,13 +81,13 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     //setup shaders
-    Shader shader = Shader();
+    Shader shader = Shader();           //init Shader (create Shader objects and bind them)
 
     glEnable(GL_DEPTH_TEST);
 
     //cube
     glm::vec3 cubePositions[] = {
-    //glm::vec3(0.0f,  0.0f,  0.0f),
+    glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(2.0f,  5.0f, -15.0f),
     glm::vec3(-1.5f, -2.2f, -2.5f),
     glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -106,10 +112,10 @@ int main()
     };
 
     //plane
-    glm::vec2 mapSize = glm::vec2(10, 10);
+    glm::vec2 mapSize = glm::vec2(MAPSIZE_X, MAPSIZE_Y);
     glm::vec3* planePosition = initMap(mapSize);
 
-    glm::vec3 planeColor = RGB(17.0f, 138.0f, 19.0f);      //currently not working
+    glm::vec3 planeColor = RGB(17.0f, 138.0f, 19.0f);
 
     //vertex input into buffer
     createCubeVAO();
@@ -119,10 +125,11 @@ int main()
     while (!glfwWindowShouldClose(window)) {                    //keep window running till it gets told to close
         //input
         processInput(window);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         //rendering
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glm::vec3 bgColor = RGB(68, 135, 201);
+        glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //use shader
@@ -133,13 +140,14 @@ int main()
         lastFrame = currentFrame;
 
         glm::mat4 view = glm::mat4(1.0f);
-        //view = glm::translate(view, glm::vec3(0.0f,0.0f, -3.0f));
+        glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);
+        cameraFront = glm::normalize(direction);
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), static_cast<float>(SCREENWIDTH) / static_cast<float>(SCREENHIGHT), 0.1f, 100.0f);
 
         glBindVertexArray(CUBE_VAO);
-        for (unsigned int i = 0; i < 9; i++)
+        for (unsigned int i = 0; i < 10; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
@@ -214,60 +222,56 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);                    //set new Values for viewport
 }
 
+#pragma region Input
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        moveCamera(Direction::forward);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        moveCamera(Direction::back);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        moveCamera(Direction::left);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        moveCamera(Direction::right);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
+    double percentage = 0.09;
+    double up = 0, down = 0, left = 0, right = 0;
+    down = SCREENHIGHT - (SCREENHIGHT * percentage);
+    up = 0 + (SCREENHIGHT * percentage);
+    left = 0 + (SCREENWIDTH * percentage);
+    right = SCREENWIDTH - (SCREENWIDTH * percentage);
+    
+    double x = xpos, y = ypos;
+    while (y < up) {
+        moveCamera(Direction::forward);
+        glfwGetCursorPos(window, &x, &y);
     }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-
-    const float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw += xoffset;
-    pitch += yoffset;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    while (y > down) {
+        moveCamera(Direction::back);
+        glfwGetCursorPos(window, &x, &y);
+    }
+    while (x > right) {
+        moveCamera(Direction::right);
+        glfwGetCursorPos(window, &x, &y);
+    }
+    while (x < left) {
+        moveCamera(Direction::left);
+        glfwGetCursorPos(window, &x, &y);
+    }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     fov -= (float)yoffset;
-    if (fov < 1.0f)
-        fov = 1.0f;
+    if (fov < 10.0f)
+        fov = 10.0f;
     if (fov > 45.0f)
         fov = 45.0f;
 }
+#pragma endregion
 
 glm::vec3 RGB(float _R, float _G, float _B) {
     float r = _R / 255;
@@ -275,6 +279,19 @@ glm::vec3 RGB(float _R, float _G, float _B) {
     float b = _B / 255;
 
     return glm::vec3(r, g, b);
+}
+
+void moveCamera(Direction direction) {
+    float cameraSpeed = 0.01f * deltaTime;                   //adjust accordingly
+    glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
+    if (direction == Direction::forward)
+        cameraPos += cameraSpeed * xzPlane * cameraFront;
+    if (direction == Direction::back)
+        cameraPos -= cameraSpeed * xzPlane * cameraFront;
+    if (direction == Direction::left)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (direction == Direction::right)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 void createCubeVAO()
@@ -387,6 +404,7 @@ void createPlaneVAO()
     glDeleteBuffers(1, &VBO);
 }
 
+#pragma region Map
 glm::vec3* initMap(glm::vec2 mapSize)
 {
     glm::vec3* planePosition;
@@ -396,7 +414,7 @@ glm::vec3* initMap(glm::vec2 mapSize)
     {
         for (unsigned int j = 0; j < mapSize.y; j++)
         {
-            planePosition[count] = glm::vec3(0.0f + i, 0.0f, 0.0f + j);
+            planePosition[count] = glm::vec3(0.0f + i, -0.5f, 0.0f + j);
             count++;
         }
     }
@@ -407,3 +425,6 @@ glm::vec3* initMap(int mapSizeX, int mapSizeY)
 {
     return initMap(glm::vec2(mapSizeX, mapSizeY));
 }
+#pragma endregion
+
+
