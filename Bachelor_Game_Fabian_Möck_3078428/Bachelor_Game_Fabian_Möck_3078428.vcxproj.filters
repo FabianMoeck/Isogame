@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Shader">
       <UniqueIdentifier>{a00eeb49-ce6b-4082-a2be-ded5c4e59f78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GameObjects">
+      <UniqueIdentifier>{d8d54e07-f3d7-4fe0-8512-ba7aa1b00a49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -26,6 +29,15 @@
     </ClCompile>
     <ClCompile Include="..\Dependencies\GLAD\src\glad.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Source Files\GameObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

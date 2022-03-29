@@ -26,6 +26,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 //input
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 //color
@@ -37,12 +38,39 @@ void createPlaneVAO();
 unsigned int CUBE_VAO;
 unsigned int PLANE_VAO;
 
+unsigned int shaderID;
+
+//draw Objects
+glm::vec3 cubePositions[] = {
+glm::vec3(0.0f,  0.0f,  0.0f),
+glm::vec3(2.0f,  5.0f, -15.0f),
+glm::vec3(-1.5f, -2.2f, -2.5f),
+glm::vec3(-3.8f, -2.0f, -12.3f),
+glm::vec3(2.4f, -0.4f, -3.5f),
+glm::vec3(-1.7f,  3.0f, -7.5f),
+glm::vec3(1.3f, -2.0f, -2.5f),
+glm::vec3(1.5f,  2.0f, -2.5f),
+glm::vec3(1.5f,  0.2f, -1.5f),
+glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+void drawCubes(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions, glm::vec3* cubeColors);
+void drawCubesPicking(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions);
+void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition);
+
 glm::vec3* initMap(glm::vec2 mapSize);
 glm::vec3* initMap(int mapSizeX, int mapSizeY);
+
+glm::mat4 view;
+glm::mat4 projection;
 
 glm::vec3 cameraPos = glm::vec3(15.0f, 10.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+bool moveCam = false;
+double screenPercentage = 0.09;
+double screenUp = 0 + (SCREENHIGHT * screenPercentage), screenDown = SCREENHIGHT - (SCREENHIGHT * screenPercentage);
+double screenLeft = 0 + (SCREENWIDTH * screenPercentage), screenRight = SCREENWIDTH - (SCREENWIDTH * screenPercentage);
 
 enum class Direction {forward, back, right, left};
 void moveCamera(Direction direction);
@@ -77,27 +105,17 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);          //set a call for a method if window gets resized
 
     //mouseCallback
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
     //setup shaders
     Shader shader = Shader();           //init Shader (create Shader objects and bind them)
+    shaderID = shader.ID;
 
     glEnable(GL_DEPTH_TEST);
 
     //cube
-    glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f,  0.0f,  0.0f),
-    glm::vec3(2.0f,  5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3(2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f,  3.0f, -7.5f),
-    glm::vec3(1.3f, -2.0f, -2.5f),
-    glm::vec3(1.5f,  2.0f, -2.5f),
-    glm::vec3(1.5f,  0.2f, -1.5f),
-    glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
     glm::vec3 cubeColors[] = {
     glm::vec3(1.0f, 1.0f, 1.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
@@ -139,53 +157,14 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);
+        glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);        //direction the camera is looking
         cameraFront = glm::normalize(direction);
 
-        glm::mat4 projection;
         projection = glm::perspective(glm::radians(fov), static_cast<float>(SCREENWIDTH) / static_cast<float>(SCREENHIGHT), 0.1f, 100.0f);
 
-        glBindVertexArray(CUBE_VAO);
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-
-            int modelloc = glGetUniformLocation(shader.ID, "model");
-            glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
-
-            //set color for cubes
-            float r = cubeColors[i].x;
-            float g = cubeColors[i].y;
-            float b = cubeColors[i].z;
-            int vertexcolor = glGetUniformLocation(shader.ID, "color");
-            glUniform3f(vertexcolor, r,g,b);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        glBindVertexArray(PLANE_VAO);
-        for (unsigned int i = 0; i < mapSize.x * mapSize.y; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, planePosition[i]);
-            float angle = 90;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
-
-            int modelloc = glGetUniformLocation(shader.ID, "model");
-            glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
-
-            float r = planeColor.x;
-            float g = planeColor.y;
-            float b = planeColor.z;
-            int vertexcolor = glGetUniformLocation(shader.ID, "color");
-            glUniform3f(vertexcolor, r, g, b);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        }
+        //render Objects
+        drawCubes(shader.ID, 10, cubePositions, cubeColors);
+        drawPlane(shader.ID, mapSize, planeColor, planePosition);
 
         //camera
         glm::vec3 camerPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -202,6 +181,20 @@ int main()
         glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
         int viewloc = glGetUniformLocation(shader.ID, "view");
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+
+        //moveCamera with Mouseposition
+        if(moveCam) {
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            if (y < screenUp)
+                moveCamera(Direction::forward);
+            if (y > screenDown)
+                moveCamera(Direction::back);
+            if (x > screenRight)
+                moveCamera(Direction::right);
+            if (x < screenLeft)
+                moveCamera(Direction::left);
+        }
 
         //check events and swap buffers
         glfwSwapBuffers(window);
@@ -237,30 +230,48 @@ void processInput(GLFWwindow* window) {
         moveCamera(Direction::right);
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    double percentage = 0.09;
-    double up = 0, down = 0, left = 0, right = 0;
-    down = SCREENHIGHT - (SCREENHIGHT * percentage);
-    up = 0 + (SCREENHIGHT * percentage);
-    left = 0 + (SCREENWIDTH * percentage);
-    right = SCREENWIDTH - (SCREENWIDTH * percentage);
-    
-    double x = xpos, y = ypos;
-    while (y < up) {
-        moveCamera(Direction::forward);
-        glfwGetCursorPos(window, &x, &y);
-    }
-    while (y > down) {
-        moveCamera(Direction::back);
-        glfwGetCursorPos(window, &x, &y);
-    }
-    while (x > right) {
-        moveCamera(Direction::right);
-        glfwGetCursorPos(window, &x, &y);
-    }
-    while (x < left) {
-        moveCamera(Direction::left);
-        glfwGetCursorPos(window, &x, &y);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {  
+    if (ypos < screenUp || ypos > screenDown || xpos > screenRight || xpos < screenLeft)
+        moveCam = true;
+    else
+        moveCam = false;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(shaderID);
+        
+        int projectloc = glGetUniformLocation(shaderID, "projection");
+        glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
+        int viewloc = glGetUniformLocation(shaderID, "view");
+        glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+
+        drawCubesPicking(shaderID, 10, cubePositions);
+
+        glFlush();
+        glFinish();
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        unsigned char data[4];
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);               //corner top left, needed to be bottom left to work...
+        //SCREENHIGHT is definde to 600 right now
+        y = SCREENHIGHT - y;                            //+ move to bottom left, - move upwards
+        std::cout << x << " / " << y << std::endl;
+
+        glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
+        int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
+
+        if (pickedID == 0x00ffffff) {
+            std::cout << "Background" << std::endl;
+        }
+        else {
+            std::cout << pickedID << std::endl;
+        }
+        glfwSwapBuffers(window);
     }
 }
 
@@ -282,7 +293,7 @@ glm::vec3 RGB(float _R, float _G, float _B) {
 }
 
 void moveCamera(Direction direction) {
-    float cameraSpeed = 0.01f * deltaTime;                   //adjust accordingly
+    float cameraSpeed = 5.0f * deltaTime;                   //adjust accordingly
     glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
     if (direction == Direction::forward)
         cameraPos += cameraSpeed * xzPlane * cameraFront;
@@ -402,6 +413,76 @@ void createPlaneVAO()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glDeleteBuffers(1, &VBO);
+}
+
+void drawCubes(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions, glm::vec3* cubeColors) {
+    glBindVertexArray(CUBE_VAO);
+    for (unsigned int i = 0; i < numberOfCubes; i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * i;
+        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        int modelloc = glGetUniformLocation(shaderID, "model");
+        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+        //set color for cubes
+        float r = cubeColors[i].x;
+        float g = cubeColors[i].y;
+        float b = cubeColors[i].z;
+        int vertexcolor = glGetUniformLocation(shaderID, "color");
+        glUniform3f(vertexcolor, r, g, b);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}
+
+void drawCubesPicking(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions) {
+    glBindVertexArray(CUBE_VAO);
+    for (unsigned int i = 0; i < numberOfCubes; i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePositions[i]);
+        float angle = 20.0f * i;
+        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+
+        int modelloc = glGetUniformLocation(shaderID, "model");
+        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+        //set color for cubes
+        int r = (i & 0x000000FF) >> 0;
+        int g = (i & 0x0000FF00) >> 8;
+        int b = (i & 0x00FF0000) >> 16;
+
+        int vertexcolor = glGetUniformLocation(shaderID, "color");
+        glUniform3f(vertexcolor, r/255.0f, g/255.0f, b/255.0f);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}
+
+void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition) {
+    glBindVertexArray(PLANE_VAO);
+    for (unsigned int i = 0; i < mapSize.x * mapSize.y; i++) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, planePosition[i]);
+        float angle = 90;
+        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        int modelloc = glGetUniformLocation(shaderID, "model");
+        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+        float r = planeColor.x;
+        float g = planeColor.y;
+        float b = planeColor.z;
+        int vertexcolor = glGetUniformLocation(shaderID, "color");
+        glUniform3f(vertexcolor, r, g, b);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 }
 
 #pragma region Map
