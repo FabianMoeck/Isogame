@@ -3,9 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <list>
 
 #include <iostream>
 #include "Shader.h"
+#include "Scene.h"
 
 #define SCREENWIDTH 800
 #define SCREENHIGHT 600
@@ -40,21 +42,10 @@ unsigned int PLANE_VAO;
 
 unsigned int shaderID;
 
-//draw Objects
-glm::vec3 cubePositions[] = {
-glm::vec3(0.0f,  0.0f,  0.0f),
-glm::vec3(2.0f,  5.0f, -15.0f),
-glm::vec3(-1.5f, -2.2f, -2.5f),
-glm::vec3(-3.8f, -2.0f, -12.3f),
-glm::vec3(2.4f, -0.4f, -3.5f),
-glm::vec3(-1.7f,  3.0f, -7.5f),
-glm::vec3(1.3f, -2.0f, -2.5f),
-glm::vec3(1.5f,  2.0f, -2.5f),
-glm::vec3(1.5f,  0.2f, -1.5f),
-glm::vec3(-1.3f,  1.0f, -1.5f)
-};
-void drawCubes(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions, glm::vec3* cubeColors);
-void drawCubesPicking(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions);
+//draw Objects / Scene
+Scene scene_1;
+void drawCube(unsigned int shaderID, GameObject toDraw);
+void drawCubePicking(unsigned int shaderID, GameObject toDraw, int NoOfObject);
 void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition);
 
 glm::vec3* initMap(glm::vec2 mapSize);
@@ -115,19 +106,12 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    //cube
-    glm::vec3 cubeColors[] = {
-    glm::vec3(1.0f, 1.0f, 1.0f),
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(1.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f),
-    glm::vec3(0.0f, 0.0f, 1.0f),
-    glm::vec3(1.0f, 1.0f, 0.0f),
-    glm::vec3(1.0f, 0.0f, 1.0f),
-    glm::vec3(0.0f, 1.0f, 1.0f),
-    glm::vec3(0.5f, 0.5f, 0.5f),
-    glm::vec3(0.2f, 0.7f, 0.5f)
-    };
+    //init Scene and GO's
+    scene_1 = Scene();
+    GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true);
+    GameObject cube2 = GameObject("Cube_White", glm::vec3(-2.0f, -0.5f, 3.0f), glm::vec3(2.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false);
+    scene_1.SceneList.push_back(cube1);
+    scene_1.SceneList.push_back(cube2);
 
     //plane
     glm::vec2 mapSize = glm::vec2(MAPSIZE_X, MAPSIZE_Y);
@@ -163,7 +147,14 @@ int main()
         projection = glm::perspective(glm::radians(fov), static_cast<float>(SCREENWIDTH) / static_cast<float>(SCREENHIGHT), 0.1f, 100.0f);
 
         //render Objects
-        drawCubes(shader.ID, 10, cubePositions, cubeColors);
+        scene_1.active = true;              //set scene as active
+        if (scene_1.active) {
+            for (GameObject g : scene_1.SceneList)
+            {
+                drawCube(shader.ID, g);
+            }
+        }
+
         drawPlane(shader.ID, mapSize, planeColor, planePosition);
 
         //camera
@@ -200,7 +191,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();                                       //check for any event happening in the window, e.g input
     }
-
 
     glDeleteVertexArrays(1, &CUBE_VAO);
     glDeleteVertexArrays(1, &PLANE_VAO);
@@ -249,7 +239,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         int viewloc = glGetUniformLocation(shaderID, "view");
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
 
-        drawCubesPicking(shaderID, 10, cubePositions);
+        int objects = 0;
+        for (GameObject Go : scene_1.SceneList)
+        {
+            if(Go.selectable)
+                drawCubePicking(shaderID, Go, objects);
+            objects++;
+        }
 
         glFlush();
         glFinish();
@@ -257,10 +253,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         unsigned char data[4];
         double x, y;
-        glfwGetCursorPos(window, &x, &y);               //corner top left, needed to be bottom left to work...
-        //SCREENHIGHT is definde to 600 right now
-        y = SCREENHIGHT - y;                            //+ move to bottom left, - move upwards
-        std::cout << x << " / " << y << std::endl;
+        glfwGetCursorPos(window, &x, &y);
+        y = SCREENHIGHT - y;
 
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
@@ -269,7 +263,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             std::cout << "Background" << std::endl;
         }
         else {
-            std::cout << pickedID << std::endl;
+            if (scene_1.active) {
+                GameObject picked = scene_1.getGameObject(scene_1.SceneList, pickedID);
+                std::cout << picked.name << std::endl;
+            }
         }
         glfwSwapBuffers(window);
     }
@@ -353,8 +350,8 @@ void createCubeVAO()
     };
 
     unsigned int indices[] = {
-    0, 1, 3, // first triangle
-    1, 2, 3  // second triangle
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
     unsigned int VBO, EBO;
@@ -390,8 +387,8 @@ void createPlaneVAO()
     };
 
     unsigned int indices[] = {
-    0, 1, 3, // first triangle
-    1, 2, 3  // second triangle
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
     unsigned int VBO, EBO;
@@ -415,53 +412,45 @@ void createPlaneVAO()
     glDeleteBuffers(1, &VBO);
 }
 
-void drawCubes(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions, glm::vec3* cubeColors) {
+void drawCube(unsigned int shaderID, GameObject toDraw) {
     glBindVertexArray(CUBE_VAO);
-    for (unsigned int i = 0; i < numberOfCubes; i++)
-    {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
-        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, toDraw.position);
+    model = glm::rotate(model, glm::radians(toDraw.angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    model = glm::scale(model, toDraw.scale);
 
-        int modelloc = glGetUniformLocation(shaderID, "model");
-        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+    int modelloc = glGetUniformLocation(shaderID, "model");
+    glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
-        //set color for cubes
-        float r = cubeColors[i].x;
-        float g = cubeColors[i].y;
-        float b = cubeColors[i].z;
-        int vertexcolor = glGetUniformLocation(shaderID, "color");
-        glUniform3f(vertexcolor, r, g, b);
+    //set color for cubes
+    float r = toDraw.color.x;
+    float g = toDraw.color.y;
+    float b = toDraw.color.z;
+    int vertexcolor = glGetUniformLocation(shaderID, "color");
+    glUniform3f(vertexcolor, r, g, b);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawCubesPicking(unsigned int shaderID, int numberOfCubes, glm::vec3* cubePositions) {
+void drawCubePicking(unsigned int shaderID, GameObject toDraw, int nr) {
     glBindVertexArray(CUBE_VAO);
-    for (unsigned int i = 0; i < numberOfCubes; i++)
-    {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
-        model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, toDraw.position);
+    model = glm::rotate(model, glm::radians(toDraw.angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    model = glm::scale(model, toDraw.scale);
 
-        int modelloc = glGetUniformLocation(shaderID, "model");
-        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+    int modelloc = glGetUniformLocation(shaderID, "model");
+    glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
-        //set color for cubes
-        int r = (i & 0x000000FF) >> 0;
-        int g = (i & 0x0000FF00) >> 8;
-        int b = (i & 0x00FF0000) >> 16;
+    //set color for cubes
+    int r = (nr & 0x000000FF) >> 0;
+    int g = (nr & 0x0000FF00) >> 8;
+    int b = (nr & 0x00FF0000) >> 16;
 
-        int vertexcolor = glGetUniformLocation(shaderID, "color");
-        glUniform3f(vertexcolor, r/255.0f, g/255.0f, b/255.0f);
+    int vertexcolor = glGetUniformLocation(shaderID, "color");
+    glUniform3f(vertexcolor, r/255.0f, g/255.0f, b/255.0f);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition) {
