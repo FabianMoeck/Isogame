@@ -4,10 +4,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <list>
-
 #include <iostream>
+
 #include "Shader.h"
 #include "Scene.h"
+#include "SelectionManager.h"
 
 #define SCREENWIDTH 800
 #define SCREENHIGHT 600
@@ -48,9 +49,14 @@ void drawCube(unsigned int shaderID, GameObject toDraw);
 void drawCubePicking(unsigned int shaderID, GameObject toDraw, int NoOfObject);
 void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition);
 
+//Selection
+SelectionManager* selManager;   
+
+//map
 glm::vec3* initMap(glm::vec2 mapSize);
 glm::vec3* initMap(int mapSizeX, int mapSizeY);
 
+//camera
 glm::mat4 view;
 glm::mat4 projection;
 
@@ -66,10 +72,11 @@ double screenLeft = 0 + (SCREENWIDTH * screenPercentage), screenRight = SCREENWI
 enum class Direction {forward, back, right, left};
 void moveCamera(Direction direction);
 
+float fov = 45.0f;
+
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-float fov = 45.0f;
 
 int main()
 {
@@ -112,6 +119,8 @@ int main()
     GameObject cube2 = GameObject("Cube_White", glm::vec3(-2.0f, -0.5f, 3.0f), glm::vec3(2.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false);
     scene_1.SceneList.push_back(cube1);
     scene_1.SceneList.push_back(cube2);
+
+    selManager = SelectionManager::getInstance();
 
     //plane
     glm::vec2 mapSize = glm::vec2(MAPSIZE_X, MAPSIZE_Y);
@@ -196,6 +205,8 @@ int main()
     glDeleteVertexArrays(1, &PLANE_VAO);
     shader.deleteShader();                      //delete Shader
 
+    delete(selManager);
+
     glfwTerminate();                                    //disconnect GLFW
     return 0;
 }
@@ -260,12 +271,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         int pickedID = data[0] + data[1] * 256 + data[2] * 256 * 256;
 
         if (pickedID == 0x00ffffff) {
-            std::cout << "Background" << std::endl;
+            std::cout << "Background -- Selection Cleared" << std::endl;
+            selManager->selection.clear();                                  //clear selection list
         }
         else {
             if (scene_1.active) {
                 GameObject picked = scene_1.getGameObject(scene_1.SceneList, pickedID);
                 std::cout << picked.name << std::endl;
+
+                selManager->selection.push_back(picked);            //add picked GameObject to selection
+                selManager->selection.unique();               //remove any GameObject twice in the list
             }
         }
         glfwSwapBuffers(window);
@@ -281,14 +296,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 #pragma endregion
 
-glm::vec3 RGB(float _R, float _G, float _B) {
-    float r = _R / 255;
-    float g = _G / 255;
-    float b = _B / 255;
-
-    return glm::vec3(r, g, b);
-}
-
 void moveCamera(Direction direction) {
     float cameraSpeed = 5.0f * deltaTime;                   //adjust accordingly
     glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
@@ -302,6 +309,17 @@ void moveCamera(Direction direction) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
+#pragma region Util
+glm::vec3 RGB(float _R, float _G, float _B) {
+    float r = _R / 255;
+    float g = _G / 255;
+    float b = _B / 255;
+
+    return glm::vec3(r, g, b);
+}
+#pragma endregion
+
+#pragma region Visualization
 void createCubeVAO()
 {
     //vertices for each cube (each side)
@@ -448,7 +466,7 @@ void drawCubePicking(unsigned int shaderID, GameObject toDraw, int nr) {
     int b = (nr & 0x00FF0000) >> 16;
 
     int vertexcolor = glGetUniformLocation(shaderID, "color");
-    glUniform3f(vertexcolor, r/255.0f, g/255.0f, b/255.0f);
+    glUniform3f(vertexcolor, r / 255.0f, g / 255.0f, b / 255.0f);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
@@ -473,6 +491,7 @@ void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, g
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 }
+#pragma endregion
 
 #pragma region Map
 glm::vec3* initMap(glm::vec2 mapSize)

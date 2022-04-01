@@ -26,12 +26,4 @@ private:
 
 };
 
-Scene::Scene()
-{
-}
-
-Scene::~Scene()
-{
-}
-
 #endif //SCENE_H
