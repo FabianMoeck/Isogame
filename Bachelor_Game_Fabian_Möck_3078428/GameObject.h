@@ -22,6 +22,8 @@ public:
 	~GameObject();
     friend bool operator==(const GameObject first, const GameObject second);
     friend bool operator!=(const GameObject first, const GameObject second);
+    void move(glm::vec3 moveCom);
+    void move(float x, float y);
 
     float* CubeVertices();
     unsigned int* Indices();

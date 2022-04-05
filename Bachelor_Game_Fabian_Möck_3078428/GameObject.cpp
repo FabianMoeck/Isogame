@@ -8,6 +8,14 @@ bool operator!=(const GameObject first, const GameObject second) {
     return (first.name != second.name);
 }
 
+void move(glm::vec3 moveCom) {
+
+}
+
+void move(float worldPosX, float worldPosY) {
+
+}
+
 GameObject::GameObject() {
     name = "New GameObject";
     selectable = false;
