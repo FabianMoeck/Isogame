@@ -11,3 +11,13 @@ SelectionManager* SelectionManager::getInstance()
 	}
 	return instance;
 }
+
+std::list<GameObject> SelectionManager::returnSelection(int index) {
+	SelectionManager* s = SelectionManager::getInstance();
+	return s->savedSelections[index];
+}
+
+void SelectionManager::saveSelection(std::list<GameObject> currentSelection, int index) {
+	SelectionManager* s = SelectionManager::getInstance();
+	s->savedSelections[index] = currentSelection;
+}

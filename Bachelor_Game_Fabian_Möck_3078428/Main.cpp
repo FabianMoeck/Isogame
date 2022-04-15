@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <list>
 #include <iostream>
 
@@ -10,11 +11,13 @@
 #include "Scene.h"
 #include "SelectionManager.h"
 
-#define SCREENWIDTH 800
-#define SCREENHIGHT 600
+#define SCREENWIDTH 1920
+#define SCREENHIGHT 1080
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
+
+glm::vec3 screenToWorld();
 
 //overloading << for vec3
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
@@ -31,6 +34,7 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 //color
 glm::vec3 RGB(float _R, float _G, float _B);                //convert any RGB value into a range from 0-1
@@ -72,7 +76,6 @@ double screenLeft = 0 + (SCREENWIDTH * screenPercentage), screenRight = SCREENWI
 
 enum class Direction {forward, back, right, left};
 void moveCamera(Direction direction);
-glm::vec3 screenToWorld(float screenX, float screenY);
 
 float fov = 45.0f;
 
@@ -109,6 +112,9 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
+    //keyboard callback
+    glfwSetKeyCallback(window, key_callback);
+
     //setup shaders
     Shader shader = Shader();           //init Shader (create Shader objects and bind them)
     shaderID = shader.ID;
@@ -118,13 +124,14 @@ int main()
     //init Scene and GO's
     scene_1 = Scene();
     GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true);
-    GameObject cube2 = GameObject("Cube_White", glm::vec3(-2.0f, -0.5f, 3.0f), glm::vec3(2.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false);
+    GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false);
     GameObject cube3 = GameObject("Cube_Blue", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 78, 168), true);
-    scene_1.SceneList.push_back(cube1);
+    /*scene_1.SceneList.push_back(cube1);
     scene_1.SceneList.push_back(cube2);
-    scene_1.SceneList.push_back(cube3);
+    scene_1.SceneList.push_back(cube3);*/
 
     selManager = SelectionManager::getInstance();
+    selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
 
     //plane
     glm::vec2 mapSize = glm::vec2(MAPSIZE_X, MAPSIZE_Y);
@@ -168,8 +175,8 @@ int main()
             }
         }
 
-        drawPlane(shader.ID, mapSize, planeColor, planePosition);
-
+        //drawPlane(shader.ID, mapSize, planeColor, planePosition);
+        
         //camera
         glm::vec3 camerPos = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -235,6 +242,66 @@ void processInput(GLFWwindow* window) {
         moveCamera(Direction::right);
 }
 
+bool ctrl_Pressed = false;
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    //save Selection
+    if (key == GLFW_KEY_LEFT_CONTROL) ctrl_Pressed = action == GLFW_PRESS;
+    if (ctrl_Pressed) {
+        switch (key) {
+        case GLFW_KEY_0:
+            selManager->saveSelection(selManager->selection, 0); break;
+        case GLFW_KEY_1:
+            selManager->saveSelection(selManager->selection, 1); break;
+        case GLFW_KEY_2:
+            selManager->saveSelection(selManager->selection, 2); break;
+        case GLFW_KEY_3:
+            selManager->saveSelection(selManager->selection, 3); break;
+        case GLFW_KEY_4:
+            selManager->saveSelection(selManager->selection, 4); break;
+        case GLFW_KEY_5:
+            selManager->saveSelection(selManager->selection, 5); break;
+        case GLFW_KEY_6:
+            selManager->saveSelection(selManager->selection, 6); break;
+        case GLFW_KEY_7:
+            selManager->saveSelection(selManager->selection, 7); break;
+        case GLFW_KEY_8:
+            selManager->saveSelection(selManager->selection, 8); break;
+        case GLFW_KEY_9:
+            selManager->saveSelection(selManager->selection, 9); break;
+        default:
+            break;
+        }
+    }
+
+    //get saved Selection
+    if (!ctrl_Pressed) {
+        switch (key) {
+        case GLFW_KEY_0:
+            selManager->selection = selManager->returnSelection(0); break;
+        case GLFW_KEY_1:
+            selManager->selection = selManager->returnSelection(1); break;
+        case GLFW_KEY_2:
+            selManager->selection = selManager->returnSelection(2); break;
+        case GLFW_KEY_3:
+            selManager->selection = selManager->returnSelection(3); break;
+        case GLFW_KEY_4:
+            selManager->selection = selManager->returnSelection(4); break;
+        case GLFW_KEY_5:
+            selManager->selection = selManager->returnSelection(5); break;
+        case GLFW_KEY_6:
+            selManager->selection = selManager->returnSelection(6); break;
+        case GLFW_KEY_7:
+            selManager->selection = selManager->returnSelection(7); break;
+        case GLFW_KEY_8:
+            selManager->selection = selManager->returnSelection(8); break;
+        case GLFW_KEY_9:
+            selManager->selection = selManager->returnSelection(9); break;
+        default:
+            break;
+        }
+    }
+}
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {  
     if (ypos < screenUp || ypos > screenDown || xpos > screenRight || xpos < screenLeft)
         moveCam = true;
@@ -272,23 +339,39 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glfwGetCursorPos(window, &xRelease, &yRelease);
         yRelease = SCREENHIGHT - yRelease;
 
-        //std::cout << "Cursor Pos start: " << xPress << "/" << yPress << std::endl;
-        //std::cout << "Cursor Pos end: " << xRelease << "/" << yRelease << std::endl;
+        //GameObject newC = GameObject("new", screen_coords_to_world_coords(xRelease, SCREENHIGHT - yRelease, SCREENWIDTH, SCREENHIGHT), glm::vec3(1.0f), 0.0f, glm::vec3(1.0f), false);
+        //scene_1.SceneList.push_back(newC);
 
-        //Problem 1: screenToWorld not right output
-        /*GameObject newCube = GameObject("added", screenToWorld(xRelease, yRelease), glm::vec3(1.0f), 0.0f, glm::vec3(0.0f), false);
-        scene_1.SceneList.push_back(newCube);*/
-
+        //calculated bottom left of square
+        double centerX = 0, centerY = 0;
+        double bottomLeftX = 0, bottomLeftY = 0;
         if (xPress != xRelease || yPress != yRelease) {
             pixelX = xRelease - xPress;
             pixelY = yRelease - yPress;
-            pixelX = glm::abs(pixelX);
+            pixelX = glm::abs(pixelX);          //size of square
             pixelY = glm::abs(pixelY);
+
+            if (xPress > xRelease)                  //calculate center
+                centerX = xPress - (pixelX / 2);
+            else if (xPress < xRelease)
+                centerX = xRelease - (pixelX / 2);
+            if (yPress > yRelease)
+                centerY = yPress - (pixelY / 2);
+            else if (yPress < yRelease)
+                centerY = yRelease - (pixelY / 2);
+
+            bottomLeftX = centerX - (pixelX / 2);       //calc bottom left
+            bottomLeftY = centerY - (pixelY / 2);
+        }
+        else {
+            bottomLeftX = xPress;           //if only clicked (no multi-selection)
+            bottomLeftY = yPress;
         }
 
         unsigned char* data = new unsigned char[pixelX * pixelY * 4];
 
-        glReadPixels(xRelease, yRelease, pixelX, pixelY, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
+        selManager->selection.clear();
+        glReadPixels(bottomLeftX, bottomLeftY, pixelX, pixelY, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
 
         std::list<int> pickedIDs = std::list<int>();
 
@@ -300,7 +383,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         }
 
         if (pickedIDs.size() == 1 && pickedIDs.front() == 0x00ffffff) {                 //if only Background was selected
-            std::cout << "Background -- Selection Cleared" << std::endl;
+            //std::cout << "Background -- Selection Cleared" << std::endl;
             selManager->selection.clear();
         }
 
@@ -311,7 +394,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             else {
                 if (scene_1.active) {
                     GameObject picked = scene_1.getGameObject(scene_1.SceneList, ID);
-                    std::cout << "Picked Object: " << picked.name << std::endl;
 
                     selManager->selection.push_back(picked);            //add picked GameObject to selection
                     selManager->selection.unique();                 //remove any GameObject twice in the list
@@ -356,20 +438,6 @@ void moveCamera(Direction direction) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (direction == Direction::right)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-}
-
-glm::vec3 screenToWorld(float screenX, float screenY) {
-    std::cout << "X/Y: " << screenX << "/" << screenY << std::endl;
-    glm::vec4 screenPos = glm::vec4((screenX / SCREENWIDTH), 1.0f , (screenY / SCREENHIGHT), 1.0f);                  //create vec4 with values between 1 - 0
-    std::cout <<"ScreenPos: "<< screenPos << std::endl;
-
-    glm::mat4 projectView = projection * view;
-    glm::mat4 invProjectView = glm::inverse(projectView);
-
-    glm::vec4 pos = invProjectView * screenPos;
-    //pos.y = 0.0f;
-    std::cout << "WorldPos: " << pos << std::endl;
-    return (glm::vec3)pos;
 }
 
 #pragma region Util
@@ -504,10 +572,29 @@ void drawCube(unsigned int shaderID, GameObject toDraw) {
     glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
     //set color for cubes
-    float r = toDraw.color.x;
-    float g = toDraw.color.y;
-    float b = toDraw.color.z;
-    int vertexcolor = glGetUniformLocation(shaderID, "color");
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+
+    if (selManager->selection.size() > 0) {             //anything is selected
+        if (std::find(selManager->selection.begin(), selManager->selection.end(), toDraw) != selManager->selection.end()) {     //check if current Object to draw is in the selectedlist
+            r = selManager->selectionColor.x;           //set selection color
+            g = selManager->selectionColor.y;
+            b = selManager->selectionColor.z;
+        }
+        else {
+            r = toDraw.color.x;                 //set Color of the GameObject
+            g = toDraw.color.y;
+            b = toDraw.color.z;
+        }
+    }
+    else {
+        r = toDraw.color.x;
+        g = toDraw.color.y;
+        b = toDraw.color.z;
+    }
+
+    int vertexcolor = glGetUniformLocation(shaderID, "color");          //sent color values to shader
     glUniform3f(vertexcolor, r, g, b);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -579,4 +666,19 @@ glm::vec3* initMap(int mapSizeX, int mapSizeY)
 }
 #pragma endregion
 
+glm::vec3 screenToWorld() {
+    /* Nedded:
+        - Camera Position -> fixed on (x, 10, z)
+        - FOV -> 45.0f (standard)
 
+       goal:
+        - vec3 (x,0,z)
+    */
+
+
+
+    glm::vec3 lookAt = glm::vec3(0.0f);
+    glm::vec3 target;
+    target = cameraPos + lookAt;
+    return target;
+}
