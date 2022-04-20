@@ -1,4 +1,4 @@
-#include "GameObject.h"
+#include "../Headers/GameObject.h"
 
 bool operator==(const GameObject first, const GameObject second) {
     return (first.name == second.name);
@@ -8,11 +8,11 @@ bool operator!=(const GameObject first, const GameObject second) {
     return (first.name != second.name);
 }
 
-void move(glm::vec3 moveCom) {
+void GameObject::move(glm::vec3 moveCom) {
 
 }
 
-void move(float worldPosX, float worldPosY) {
+void GameObject::move(float worldPosX, float worldPosY) {
 
 }
 
@@ -25,7 +25,7 @@ GameObject::GameObject() {
     color = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
-GameObject::GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable)
+GameObject::GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable, GameObjectType _type)
 {
     name = _name;
     position = _position;
@@ -33,6 +33,7 @@ GameObject::GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale,
     angle = _angle;
     color = _color;
     selectable = _selectable;
+    type = _type;
 }
 
 GameObject::~GameObject()

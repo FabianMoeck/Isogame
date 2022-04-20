@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLAD\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\IMGUI;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLAD\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,17 +146,33 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Dependencies\GLAD\src\glad.c" />
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_demo.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_draw.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_tables.cpp" />
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SelectionManager.cpp" />
+    <ClCompile Include="src\cpp\GameObject.cpp" />
+    <ClCompile Include="src\cpp\Scene.cpp" />
+    <ClCompile Include="src\cpp\SelectionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SelectionManager.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imconfig.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imgui.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_glfw.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_internal.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_rectpack.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_textedit.h" />
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="src\Headers\Camera.h" />
+    <ClInclude Include="src\Headers\GameObject.h" />
+    <ClInclude Include="src\Headers\Scene.h" />
+    <ClInclude Include="src\Headers\SelectionManager.h" />
+    <ClInclude Include="src\Headers\Shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

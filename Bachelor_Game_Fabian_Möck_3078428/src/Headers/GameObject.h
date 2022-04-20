@@ -17,8 +17,20 @@ public:
 	float angle;
 	glm::vec3 color;
 
+    enum class GameObjectType
+    {
+        Unit_1,
+        Unit_2,
+        Building
+    };
+    GameObjectType type;
+    static const char* type_tostring(int type) {
+        const char* types[] = { "Unit_1", "Unit_2", "Building" };
+        return types[type];
+    };
+
 	GameObject();
-	GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable);
+	GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable, GameObjectType _type);
 	~GameObject();
     friend bool operator==(const GameObject first, const GameObject second);
     friend bool operator!=(const GameObject first, const GameObject second);

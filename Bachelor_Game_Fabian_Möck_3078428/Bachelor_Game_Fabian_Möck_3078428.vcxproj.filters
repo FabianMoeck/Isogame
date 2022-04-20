@@ -13,14 +13,23 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Camera">
-      <UniqueIdentifier>{6ea4a2e9-61f0-4e88-8068-5853ff185099}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Shader">
-      <UniqueIdentifier>{a00eeb49-ce6b-4082-a2be-ded5c4e59f78}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\GameObjects">
       <UniqueIdentifier>{d8d54e07-f3d7-4fe0-8512-ba7aa1b00a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GameObjects">
+      <UniqueIdentifier>{bd620842-70f9-4b12-b983-de84f1be5020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shader">
+      <UniqueIdentifier>{a00eeb49-ce6b-4082-a2be-ded5c4e59f78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{6ea4a2e9-61f0-4e88-8068-5853ff185099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IMGUI">
+      <UniqueIdentifier>{ed56fee0-f073-4565-bab3-37775ca9fe23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IMGUI">
+      <UniqueIdentifier>{f117981a-4abe-4735-99c1-3c79839f1ab5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -30,31 +39,79 @@
     <ClCompile Include="..\Dependencies\GLAD\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SelectionManager.cpp">
+    <ClCompile Include="src\cpp\Scene.cpp">
       <Filter>Source Files\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
+    <ClCompile Include="src\cpp\SelectionManager.cpp">
       <Filter>Source Files\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
+    <ClCompile Include="src\cpp\GameObject.cpp">
       <Filter>Source Files\GameObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_draw.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_glfw.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_tables.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_widgets.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui.cpp">
+      <Filter>Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Dependencies\IMGUI\imgui_demo.cpp">
+      <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Shader.h">
-      <Filter>Source Files\Shader</Filter>
+    <ClInclude Include="src\Headers\Shader.h">
+      <Filter>Header Files\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source Files\Camera</Filter>
+    <ClInclude Include="src\Headers\Scene.h">
+      <Filter>Header Files\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Source Files\GameObjects</Filter>
+    <ClInclude Include="src\Headers\SelectionManager.h">
+      <Filter>Header Files\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>Source Files\GameObjects</Filter>
+    <ClInclude Include="src\Headers\GameObject.h">
+      <Filter>Header Files\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="SelectionManager.h">
-      <Filter>Source Files\GameObjects</Filter>
+    <ClInclude Include="src\Headers\Camera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_internal.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_rectpack.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_textedit.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imstb_truetype.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imconfig.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imgui.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_glfw.h">
+      <Filter>Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3.h">
+      <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

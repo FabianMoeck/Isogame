@@ -1,3 +1,7 @@
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -7,12 +11,12 @@
 #include <list>
 #include <iostream>
 
-#include "Shader.h"
-#include "Scene.h"
-#include "SelectionManager.h"
+#include "src/Headers/Shader.h"
+#include "src/Headers/Scene.h"
+#include "src/Headers/SelectionManager.h"
 
-#define SCREENWIDTH 1920
-#define SCREENHIGHT 1080
+#define INIT_SCREENWIDTH 800                //only initial screensize
+#define INIT_SCREENHEIGTH 600
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
@@ -37,7 +41,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 //color
-glm::vec3 RGB(float _R, float _G, float _B);                //convert any RGB value into a range from 0-1
+glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
+
+//Screen
+int screenHeight = INIT_SCREENHEIGTH;
+int screenWidth = INIT_SCREENWIDTH;
 
 //VAO
 void createCubeVAO();
@@ -49,19 +57,20 @@ unsigned int shaderID;
 
 //draw Objects / Scene
 Scene scene_1;
-void drawCube(unsigned int shaderID, GameObject toDraw);
-void drawCubePicking(unsigned int shaderID, GameObject toDraw, int NoOfObject);
-void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition);
+void drawCube(const unsigned int shaderID, const GameObject toDraw);
+void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int NoOfObject);
+void drawPlane(const unsigned int shaderID, const glm::vec2 mapSize, const glm::vec3 planeColor, const glm::vec3* planePosition);
 
 //Selection
 SelectionManager* selManager;
 double xPress = 0, yPress = 0;
 
 //map
-glm::vec3* initMap(glm::vec2 mapSize);
-glm::vec3* initMap(int mapSizeX, int mapSizeY);
+glm::vec3* initMap(const glm::vec2 mapSize);
+glm::vec3* initMap(const int mapSizeX, const int mapSizeY);
 
 //camera
+float fov = 45.0f;
 glm::mat4 view;
 glm::mat4 projection;
 
@@ -71,17 +80,21 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 bool moveCam = false;
 double screenPercentage = 0.09;
-double screenUp = 0 + (SCREENHIGHT * screenPercentage), screenDown = SCREENHIGHT - (SCREENHIGHT * screenPercentage);
-double screenLeft = 0 + (SCREENWIDTH * screenPercentage), screenRight = SCREENWIDTH - (SCREENWIDTH * screenPercentage);
+double screenUp = 0 + (screenHeight * screenPercentage), screenDown = screenHeight - (screenHeight * screenPercentage);
+double screenLeft = 0 + (screenWidth * screenPercentage), screenRight = screenWidth - (screenWidth * screenPercentage);
 
 enum class Direction {forward, back, right, left};
 void moveCamera(Direction direction);
 
-float fov = 45.0f;
-
+//time
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+//UI
+double UIpercentageRight = 0.25;
+double UIright = screenWidth - (screenWidth * UIpercentageRight);
+double UIpercentageBottom = 0.15;
+double UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
 
 int main()
 {
@@ -90,7 +103,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCREENWIDTH, SCREENHIGHT, "ISO Game", NULL, NULL);        //create Window (width, height, name, monitor, share)
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "ISO Game", NULL, NULL);        //create Window (width, height, name, monitor, share)
 
     if (window == NULL) {                                       //check if window was created
         std::cout << "Failed to create window" << std::endl;
@@ -104,7 +117,7 @@ int main()
         return -1;
     }
 
-    glViewport(0, 0, SCREENWIDTH, SCREENHIGHT);                                     //set size for window
+    glViewport(0, 0, screenWidth, screenHeight);                                     //set size for window
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);          //set a call for a method if window gets resized
 
     //mouseCallback
@@ -121,14 +134,17 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
+#pragma region Scene/GameObjects
     //init Scene and GO's
     scene_1 = Scene();
-    GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true);
-    GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false);
-    GameObject cube3 = GameObject("Cube_Blue", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 78, 168), true);
-    /*scene_1.SceneList.push_back(cube1);
+    GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
+    GameObject cube3 = GameObject("Cube_Blue", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 78, 168), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
+    scene_1.SceneList.push_back(cube1);
     scene_1.SceneList.push_back(cube2);
-    scene_1.SceneList.push_back(cube3);*/
+    scene_1.SceneList.push_back(cube3);
+    scene_1.SceneList.push_back(cube4);
 
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
@@ -142,6 +158,21 @@ int main()
     //vertex input into buffer
     createCubeVAO();
     createPlaneVAO();
+#pragma endregion
+
+#pragma region ImGuI
+    //ImGui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    //ImGui style
+    ImGuiStyle* style = &ImGui::GetStyle();
+    style->WindowMenuButtonPosition = ImGuiDir_None;
+#pragma endregion    
 
     //render loop
     while (!glfwWindowShouldClose(window)) {                    //keep window running till it gets told to close
@@ -154,6 +185,11 @@ int main()
         glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //ImGui
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         //use shader
         shader.use();
 
@@ -164,7 +200,7 @@ int main()
         glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);        //direction the camera is looking
         cameraFront = glm::normalize(direction);
 
-        projection = glm::perspective(glm::radians(fov), static_cast<float>(SCREENWIDTH) / static_cast<float>(SCREENHIGHT), 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
         //render Objects
         scene_1.active = true;              //set scene as active
@@ -175,7 +211,80 @@ int main()
             }
         }
 
-        //drawPlane(shader.ID, mapSize, planeColor, planePosition);
+        drawPlane(shader.ID, mapSize, planeColor, planePosition);
+
+#pragma region UI content
+        //ImGui UIRight
+        ImGui::Begin("Test UI");
+        ImGui::SetWindowPos(ImVec2(UIright, 0.5));
+        ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
+
+        if (ImGui::BeginTabBar("tabs")) {
+            if (ImGui::BeginTabItem("Buildings")) {
+                if (ImGui::Button("Building 1", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                    std::cout << "Building 1" << std::endl;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Building 2", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                    std::cout << "Building 2" << std::endl;
+                }
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Units")) {
+                if (ImGui::Button("Unit 1", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                    std::cout << "Unit 1" << std::endl;
+                }
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::End();
+
+        //BottomUI
+        if (selManager->selection.size() > 0) {
+            ImGui::Begin("BottomUI");
+            ImGui::SetWindowPos(ImVec2(0, UIbottom));
+            ImGui::SetWindowSize(ImVec2((screenWidth - (screenWidth * UIpercentageRight)), (screenHeight - UIbottom)));
+
+            std::list<int> checkedtypes;
+            std::list<GameObject> newSel;
+            for (GameObject selected : selManager->selection) {
+                ImGui::SameLine();
+                if (checkedtypes.size() == 0) {
+                    checkedtypes.push_back((int)selected.type);
+                    if (ImGui::Button(selected.type_tostring((int)selected.type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
+                        for (GameObject withType : selManager->selection) {
+                            if (withType.type == selected.type) {
+                                newSel.push_back(withType);
+                            }
+                        }
+
+                        selManager->selection = newSel;
+                        break;
+                    }
+                }
+                for (int i : checkedtypes) {
+                    if (i != (int)selected.type) {
+                        checkedtypes.push_back((int)selected.type);
+                        if (ImGui::Button(selected.type_tostring((int)selected.type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
+                            for (GameObject withType : selManager->selection) {
+                                if (withType.type == selected.type) {
+                                    newSel.push_back(withType);
+                                }
+                            }
+                            selManager->selection = newSel;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            ImGui::End();
+        }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#pragma endregion
         
         //camera
         glm::vec3 camerPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -212,6 +321,11 @@ int main()
         glfwPollEvents();                                       //check for any event happening in the window, e.g input
     }
 
+    //end ImGui
+    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui::DestroyContext();
+
     glDeleteVertexArrays(1, &CUBE_VAO);
     glDeleteVertexArrays(1, &PLANE_VAO);
     shader.deleteShader();                      //delete Shader
@@ -225,6 +339,17 @@ int main()
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);                    //set new Values for viewport
+
+    screenHeight = height;
+    screenWidth = width;
+
+    UIright = screenWidth - (screenWidth * UIpercentageRight);           //recalculate percentage values at borders
+    UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
+
+    screenUp = 0 + (screenHeight * screenPercentage); 
+    screenDown = screenHeight - (screenHeight * screenPercentage);
+    screenLeft = 0 + (screenWidth * screenPercentage); 
+    screenRight = screenWidth - (screenWidth * screenPercentage);
 }
 
 #pragma region Input
@@ -337,7 +462,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
         double xRelease, yRelease;
         glfwGetCursorPos(window, &xRelease, &yRelease);
-        yRelease = SCREENHIGHT - yRelease;
+        yRelease = screenHeight - yRelease;
 
         //GameObject newC = GameObject("new", screen_coords_to_world_coords(xRelease, SCREENHIGHT - yRelease, SCREENWIDTH, SCREENHIGHT), glm::vec3(1.0f), 0.0f, glm::vec3(1.0f), false);
         //scene_1.SceneList.push_back(newC);
@@ -370,7 +495,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
         unsigned char* data = new unsigned char[pixelX * pixelY * 4];
 
-        selManager->selection.clear();
+        if (yRelease > screenHeight * UIpercentageBottom) {
+            selManager->selection.clear();
+        }
+
         glReadPixels(bottomLeftX, bottomLeftY, pixelX, pixelY, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
 
         std::list<int> pickedIDs = std::list<int>();
@@ -384,7 +512,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
         if (pickedIDs.size() == 1 && pickedIDs.front() == 0x00ffffff) {                 //if only Background was selected
             //std::cout << "Background -- Selection Cleared" << std::endl;
-            selManager->selection.clear();
+            if (yRelease > screenHeight * UIpercentageBottom) {
+                selManager->selection.clear();
+            }
+                
         }
 
         for (int ID : pickedIDs) {
@@ -406,7 +537,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         glfwGetCursorPos(window, &xPress, &yPress);
-        yPress = SCREENHIGHT - yPress;
+        yPress = screenHeight - yPress;
     }
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
@@ -441,7 +572,7 @@ void moveCamera(Direction direction) {
 }
 
 #pragma region Util
-glm::vec3 RGB(float _R, float _G, float _B) {
+glm::vec3 RGB(const float _R, const float _G, const float _B) {
     float r = _R / 255;
     float g = _G / 255;
     float b = _B / 255;
@@ -561,7 +692,7 @@ void createPlaneVAO()
     glDeleteBuffers(1, &VBO);
 }
 
-void drawCube(unsigned int shaderID, GameObject toDraw) {
+void drawCube(const unsigned int shaderID, const GameObject toDraw) {
     glBindVertexArray(CUBE_VAO);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, toDraw.position);
@@ -600,7 +731,7 @@ void drawCube(unsigned int shaderID, GameObject toDraw) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawCubePicking(unsigned int shaderID, GameObject toDraw, int nr) {
+void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int nr) {
     glBindVertexArray(CUBE_VAO);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, toDraw.position);
@@ -621,7 +752,7 @@ void drawCubePicking(unsigned int shaderID, GameObject toDraw, int nr) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, glm::vec3* planePosition) {
+void drawPlane(const unsigned int shaderID, const glm::vec2 mapSize, const glm::vec3 planeColor, const glm::vec3* planePosition) {
     glBindVertexArray(PLANE_VAO);
     for (unsigned int i = 0; i < mapSize.x * mapSize.y; i++) {
         glm::mat4 model = glm::mat4(1.0f);
@@ -644,7 +775,7 @@ void drawPlane(unsigned int shaderID, glm::vec2 mapSize, glm::vec3 planeColor, g
 #pragma endregion
 
 #pragma region Map
-glm::vec3* initMap(glm::vec2 mapSize)
+glm::vec3* initMap(const glm::vec2 mapSize)
 {
     glm::vec3* planePosition;
     planePosition = new glm::vec3[mapSize.x * mapSize.y];
@@ -660,7 +791,7 @@ glm::vec3* initMap(glm::vec2 mapSize)
     return planePosition;
 }
 
-glm::vec3* initMap(int mapSizeX, int mapSizeY)
+glm::vec3* initMap(const int mapSizeX, const int mapSizeY)
 {
     return initMap(glm::vec2(mapSizeX, mapSizeY));
 }
