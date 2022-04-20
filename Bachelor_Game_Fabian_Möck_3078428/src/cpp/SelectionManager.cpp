@@ -21,3 +21,7 @@ void SelectionManager::saveSelection(std::list<GameObject> currentSelection, int
 	SelectionManager* s = SelectionManager::getInstance();
 	s->savedSelections[index] = currentSelection;
 }
+
+void SelectionManager::setSelection(std::list<GameObject> newSelection) {
+	selection = newSelection;
+}

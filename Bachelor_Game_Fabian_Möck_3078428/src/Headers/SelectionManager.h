@@ -16,6 +16,7 @@ public:
 
 	std::list<GameObject> returnSelection(int index);
 	void saveSelection(std::list<GameObject> currentSelection, int index);
+	void setSelection(std::list<GameObject> newSelection);
 
 private:
 	static SelectionManager* instance;

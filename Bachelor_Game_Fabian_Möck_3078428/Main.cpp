@@ -1,19 +1,4 @@
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <list>
-#include <iostream>
-
-#include "src/Headers/Shader.h"
-#include "src/Headers/Scene.h"
-#include "src/Headers/SelectionManager.h"
+#include "Main.h"
 
 #define INIT_SCREENWIDTH 800                //only initial screensize
 #define INIT_SCREENHEIGTH 600
@@ -23,33 +8,12 @@
 
 glm::vec3 screenToWorld();
 
-//overloading << for vec3
-std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
-std::ostream& operator<<(std::ostream& os, const glm::vec3 vec)
-{
-    os << vec.x << "/" << vec.y << "/" << vec.z;
-    return os;
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-//input
-void processInput(GLFWwindow* window);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-//color
-glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
-
+#pragma region Variables
 //Screen
 int screenHeight = INIT_SCREENHEIGTH;
 int screenWidth = INIT_SCREENWIDTH;
 
 //VAO
-void createCubeVAO();
-void createPlaneVAO();
 unsigned int CUBE_VAO;
 unsigned int PLANE_VAO;
 
@@ -57,17 +21,10 @@ unsigned int shaderID;
 
 //draw Objects / Scene
 Scene scene_1;
-void drawCube(const unsigned int shaderID, const GameObject toDraw);
-void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int NoOfObject);
-void drawPlane(const unsigned int shaderID, const glm::vec2 mapSize, const glm::vec3 planeColor, const glm::vec3* planePosition);
 
 //Selection
 SelectionManager* selManager;
 double xPress = 0, yPress = 0;
-
-//map
-glm::vec3* initMap(const glm::vec2 mapSize);
-glm::vec3* initMap(const int mapSizeX, const int mapSizeY);
 
 //camera
 float fov = 45.0f;
@@ -83,7 +40,7 @@ double screenPercentage = 0.09;
 double screenUp = 0 + (screenHeight * screenPercentage), screenDown = screenHeight - (screenHeight * screenPercentage);
 double screenLeft = 0 + (screenWidth * screenPercentage), screenRight = screenWidth - (screenWidth * screenPercentage);
 
-enum class Direction {forward, back, right, left};
+enum class Direction { forward, back, right, left };
 void moveCamera(Direction direction);
 
 //time
@@ -95,6 +52,7 @@ double UIpercentageRight = 0.25;
 double UIright = screenWidth - (screenWidth * UIpercentageRight);
 double UIpercentageBottom = 0.15;
 double UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
+#pragma endregion
 
 int main()
 {
@@ -139,7 +97,7 @@ int main()
     scene_1 = Scene();
     GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true, GameObject::GameObjectType::Unit_1);
     GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
-    GameObject cube3 = GameObject("Cube_Blue", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 78, 168), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube3 = GameObject("Cube_Red", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
     scene_1.SceneList.push_back(cube1);
     scene_1.SceneList.push_back(cube2);
@@ -215,7 +173,7 @@ int main()
 
 #pragma region UI content
         //ImGui UIRight
-        ImGui::Begin("Test UI");
+        ImGui::Begin("Rigth UI");
         ImGui::SetWindowPos(ImVec2(UIright, 0.5));
         ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
 
@@ -258,8 +216,6 @@ int main()
                                 newSel.push_back(withType);
                             }
                         }
-
-                        selManager->selection = newSel;
                         break;
                     }
                 }
@@ -272,11 +228,13 @@ int main()
                                     newSel.push_back(withType);
                                 }
                             }
-                            selManager->selection = newSel;
                             break;
                         }
                     }
                 }
+            }
+            if (newSel.size() > 0) {                //if a new Selection is done by the buttons
+                selManager->setSelection(newSel);
             }
 
             ImGui::End();
@@ -579,6 +537,13 @@ glm::vec3 RGB(const float _R, const float _G, const float _B) {
 
     return glm::vec3(r, g, b);
 }
+
+//overloading << for vec3
+std::ostream& operator<<(std::ostream& os, const glm::vec3 vec)
+{
+    os << vec.x << "/" << vec.y << "/" << vec.z;
+    return os;
+}
 #pragma endregion
 
 #pragma region Visualization
@@ -804,12 +769,9 @@ glm::vec3 screenToWorld() {
 
        goal:
         - vec3 (x,0,z)
+
+        lokkat = rotate x, rotate y
+        cameraPos + t* lookat = target
     */
-
-
-
-    glm::vec3 lookAt = glm::vec3(0.0f);
-    glm::vec3 target;
-    target = cameraPos + lookAt;
-    return target;
+    return glm::vec3(0.0f);
 }

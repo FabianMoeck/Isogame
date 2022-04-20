@@ -113,5 +113,8 @@
     <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
