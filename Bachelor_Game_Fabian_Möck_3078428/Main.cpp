@@ -6,8 +6,6 @@
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
 
-glm::vec3 screenToWorld();
-
 #pragma region Variables
 //Screen
 int screenHeight = INIT_SCREENHEIGTH;
@@ -31,7 +29,7 @@ float fov = 45.0f;
 glm::mat4 view;
 glm::mat4 projection;
 
-glm::vec3 cameraPos = glm::vec3(15.0f, 10.0f, 10.0f);
+glm::vec3 cameraPos = glm::vec3(25.0f, 20.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -56,6 +54,7 @@ double UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
 
 int main()
 {
+#pragma region Window Init / Inputcallbacks
     glfwInit();                                                 //Init GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);               //set Version of GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -85,6 +84,7 @@ int main()
 
     //keyboard callback
     glfwSetKeyCallback(window, key_callback);
+#pragma endregion
 
     //setup shaders
     Shader shader = Shader();           //init Shader (create Shader objects and bind them)
@@ -95,9 +95,9 @@ int main()
 #pragma region Scene/GameObjects
     //init Scene and GO's
     scene_1 = Scene();
-    GameObject cube1 = GameObject("testCube", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 0.5f, 0.5f), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube1 = GameObject("TestUnit_1", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
-    GameObject cube3 = GameObject("Cube_Red", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube3 = GameObject("TestUnit_2", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
     scene_1.SceneList.push_back(cube1);
     scene_1.SceneList.push_back(cube2);
@@ -517,7 +517,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 #pragma endregion
 
 void moveCamera(Direction direction) {
-    float cameraSpeed = 5.0f * deltaTime;                   //adjust accordingly
+    float cameraSpeed = 10.0f * deltaTime;                   //adjust accordingly
     glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
     if (direction == Direction::forward)
         cameraPos += cameraSpeed * xzPlane * cameraFront;
@@ -761,17 +761,3 @@ glm::vec3* initMap(const int mapSizeX, const int mapSizeY)
     return initMap(glm::vec2(mapSizeX, mapSizeY));
 }
 #pragma endregion
-
-glm::vec3 screenToWorld() {
-    /* Nedded:
-        - Camera Position -> fixed on (x, 10, z)
-        - FOV -> 45.0f (standard)
-
-       goal:
-        - vec3 (x,0,z)
-
-        lokkat = rotate x, rotate y
-        cameraPos + t* lookat = target
-    */
-    return glm::vec3(0.0f);
-}
