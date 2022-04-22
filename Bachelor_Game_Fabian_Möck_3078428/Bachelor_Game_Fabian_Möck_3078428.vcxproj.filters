@@ -75,7 +75,7 @@
     <ClCompile Include="..\Dependencies\IMGUI\imgui_demo.cpp">
       <Filter>Source Files\IMGUI</Filter>
     </ClCompile>
-    <ClCompile Include="Map.cpp">
+    <ClCompile Include="src\cpp\Map.cpp">
       <Filter>Source Files\Map</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,7 +125,7 @@
     <ClInclude Include="Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Map.h">
+    <ClInclude Include="src\Headers\Map.h">
       <Filter>Header Files\Map</Filter>
     </ClInclude>
   </ItemGroup>

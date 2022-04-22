@@ -5,7 +5,7 @@
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
-#define GRID_MULTI 10
+#define GRID_MULTI 10               //how much each plane part is devided in the grid (10 = 10 times)
 
 //work in Porgress
 
