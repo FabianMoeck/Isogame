@@ -1,4 +1,4 @@
-#include "src/Headers/Map.h"
+#include "Map.h"
 
 Map::Map() {
 

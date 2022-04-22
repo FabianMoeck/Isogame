@@ -15,7 +15,7 @@
 #include "src/Headers/Shader.h"
 #include "src/Headers/Scene.h"
 #include "src/Headers/SelectionManager.h"
-#include "Map.h"
+#include "src/Headers/Map.h"
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 
