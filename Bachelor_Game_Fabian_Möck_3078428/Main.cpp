@@ -5,6 +5,9 @@
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
+#define GRID_MULTI 10
+
+//work in Porgress
 
 #pragma region Variables
 //Screen
@@ -19,6 +22,7 @@ unsigned int shaderID;
 
 //draw Objects / Scene
 Scene scene_1;
+Map map;
 
 //Selection
 SelectionManager* selManager;
@@ -107,11 +111,8 @@ int main()
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
 
-    //plane
-    glm::vec2 mapSize = glm::vec2(MAPSIZE_X, MAPSIZE_Y);
-    glm::vec3* planePosition = initMap(mapSize);
-
-    glm::vec3 planeColor = RGB(17.0f, 138.0f, 19.0f);
+    //Map
+    map = Map(MAPSIZE_X,MAPSIZE_Y, RGB(17.0f, 138.0f, 19.0f), GRID_MULTI);
 
     //vertex input into buffer
     createCubeVAO();
@@ -169,7 +170,8 @@ int main()
             }
         }
 
-        drawPlane(shader.ID, mapSize, planeColor, planePosition);
+        drawPlane(shader.ID, map);
+        //drawPickingPlane(shaderID, map);          //debug
 
 #pragma region UI content
         //ImGui UIRight
@@ -422,9 +424,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glfwGetCursorPos(window, &xRelease, &yRelease);
         yRelease = screenHeight - yRelease;
 
-        //GameObject newC = GameObject("new", screen_coords_to_world_coords(xRelease, SCREENHIGHT - yRelease, SCREENWIDTH, SCREENHIGHT), glm::vec3(1.0f), 0.0f, glm::vec3(1.0f), false);
-        //scene_1.SceneList.push_back(newC);
-
         //calculated bottom left of square
         double centerX = 0, centerY = 0;
         double bottomLeftX = 0, bottomLeftY = 0;
@@ -500,8 +499,37 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
         if (selManager->selection.size() > 0) {
-            for (GameObject selected : selManager->selection) {
-                std::cout << selected.name << " moves" << std::endl;
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glUseProgram(shaderID);
+
+            int projectloc = glGetUniformLocation(shaderID, "projection");
+            glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
+            int viewloc = glGetUniformLocation(shaderID, "view");
+            glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+
+            drawPickingPlane(shaderID, map);
+
+            glFlush();
+            glFinish();
+
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+            double xRelease, yRelease;
+            glfwGetCursorPos(window, &xRelease, &yRelease);
+            yRelease = screenHeight - yRelease;
+
+            unsigned char* data = new unsigned char[4];
+            glReadPixels(xRelease, yRelease, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            int picked_X = data[1];
+            int picked_Y = data[2];
+            if (picked_X + picked_Y == 336)
+                std::cout << "not clicked on Map" << std::endl;
+            else {
+                std::cout << picked_X << " / " << picked_Y << std::endl;
+                for (GameObject selected : selManager->selection) {
+                    //move
+                }
             }
         }
     }
@@ -717,47 +745,49 @@ void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawPlane(const unsigned int shaderID, const glm::vec2 mapSize, const glm::vec3 planeColor, const glm::vec3* planePosition) {
+void drawPlane(const unsigned int shaderID, const Map map) {
     glBindVertexArray(PLANE_VAO);
-    for (unsigned int i = 0; i < mapSize.x * mapSize.y; i++) {
+    for (unsigned int i = 0; i < map.mapSize.x * map.mapSize.y; i++) {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, planePosition[i]);
+        model = glm::translate(model, map.mapPosition[i]);
         float angle = 90;
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 
         int modelloc = glGetUniformLocation(shaderID, "model");
         glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
-        float r = planeColor.x;
-        float g = planeColor.y;
-        float b = planeColor.z;
+        float r = map.mapColor.x;
+        float g = map.mapColor.y;
+        float b = map.mapColor.z;
         int vertexcolor = glGetUniformLocation(shaderID, "color");
         glUniform3f(vertexcolor, r, g, b);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 }
-#pragma endregion
 
-#pragma region Map
-glm::vec3* initMap(const glm::vec2 mapSize)
-{
-    glm::vec3* planePosition;
-    planePosition = new glm::vec3[mapSize.x * mapSize.y];
-    int count = 0;
-    for (unsigned int i = 0; i < mapSize.x; i++)
-    {
-        for (unsigned int j = 0; j < mapSize.y; j++)
-        {
-            planePosition[count] = glm::vec3(0.0f + i, -0.5f, 0.0f + j);
-            count++;
+void drawPickingPlane(const unsigned int shaderID, const Map map) {
+    glBindVertexArray(PLANE_VAO);
+    for (unsigned int i = 0; i < map.mapSize.x * GRID_MULTI; i++) {
+        for (unsigned int j = 0; j < map.mapSize.y * GRID_MULTI; j++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, map.grid[i][j]);
+            float angle = 90;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+
+            int modelloc = glGetUniformLocation(shaderID, "model");
+            glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+            //set color for cubes
+            //int r = (i & 0x000000FF) >> 0;                //ignore red
+            int g = (i * 256 & 0x0000FF00) >> 8;
+            int b = (j * (256*256) & 0x00FF0000) >> 16; 
+
+            int vertexcolor = glGetUniformLocation(shaderID, "color");
+            glUniform3f(vertexcolor, 0.0f, g / 255.0f, b / 255.0f);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         }
     }
-    return planePosition;
-}
-
-glm::vec3* initMap(const int mapSizeX, const int mapSizeY)
-{
-    return initMap(glm::vec2(mapSizeX, mapSizeY));
 }
 #pragma endregion

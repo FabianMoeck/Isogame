@@ -8,11 +8,7 @@ bool operator!=(const GameObject first, const GameObject second) {
     return (first.name != second.name);
 }
 
-void GameObject::move(glm::vec3 moveCom) {
-
-}
-
-void GameObject::move(float worldPosX, float worldPosY) {
+void GameObject::move(const glm::vec3** grid, const int _X, const int _Y) {
 
 }
 

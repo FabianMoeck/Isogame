@@ -14,9 +14,9 @@ public:
 
 	std::list<GameObject> savedSelections[10];
 
-	std::list<GameObject> returnSelection(int index);
-	void saveSelection(std::list<GameObject> currentSelection, int index);
-	void setSelection(std::list<GameObject> newSelection);
+	std::list<GameObject> returnSelection(const int index);
+	void saveSelection(const std::list<GameObject> currentSelection, const int index);
+	void setSelection(const std::list<GameObject> newSelection);
 
 private:
 	static SelectionManager* instance;

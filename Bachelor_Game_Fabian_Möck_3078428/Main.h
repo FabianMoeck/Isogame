@@ -15,6 +15,7 @@
 #include "src/Headers/Shader.h"
 #include "src/Headers/Scene.h"
 #include "src/Headers/SelectionManager.h"
+#include "Map.h"
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 
@@ -34,11 +35,8 @@ void createPlaneVAO();
 //GameObjects
 void drawCube(const unsigned int shaderID, const GameObject toDraw);
 void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int NoOfObject);
-void drawPlane(const unsigned int shaderID, const glm::vec2 mapSize, const glm::vec3 planeColor, const glm::vec3* planePosition);
-
-//map
-glm::vec3* initMap(const glm::vec2 mapSize);
-glm::vec3* initMap(const int mapSizeX, const int mapSizeY);
+void drawPlane(const unsigned int shaderID, const Map map);
+void drawPickingPlane(const unsigned int shaderID, const Map map);
 
 //color
 glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
