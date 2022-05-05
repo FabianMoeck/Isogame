@@ -16,6 +16,7 @@
 #include "src/Headers/Scene.h"
 #include "src/Headers/SelectionManager.h"
 #include "src/Headers/Map.h"
+#include "src/Headers/ghostGameObject.h"
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 
@@ -31,12 +32,25 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 //VAO
 void createCubeVAO();
 void createPlaneVAO();
+void createGridVAO();
 
 //GameObjects
-void drawCube(const unsigned int shaderID, const GameObject toDraw);
-void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int NoOfObject);
-void drawPlane(const unsigned int shaderID, const Map map);
-void drawPickingPlane(const unsigned int shaderID, const Map map);
+void drawCube(const unsigned int shaderID, const GameObject* toDraw);
+void drawCubePicking(const unsigned int shaderID, const GameObject* toDraw, const int NoOfObject);
+void drawPlane(const unsigned int shaderID, const Map *map);
+void drawPickingPlane(const unsigned int shaderID, const Map *map);
+void drawGhostObject(unsigned int shaderID, GhostGO* todraw);
+void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map);
 
 //color
 glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
+
+struct targetObject {
+    GameObject* go;
+    int tX;
+    int tY;
+    float dist = 0;
+
+    bool operator==(const targetObject& t)const { if (go == t.go)return true; };
+};
+void moveGameObject(targetObject* target);

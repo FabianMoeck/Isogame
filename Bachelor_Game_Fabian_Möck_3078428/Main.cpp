@@ -5,7 +5,7 @@
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
-#define GRID_MULTI 10               //how much each plane part is devided in the grid (10 = 10 times)
+#define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10 times)
 
 //work in Porgress
 
@@ -17,12 +17,19 @@ int screenWidth = INIT_SCREENWIDTH;
 //VAO
 unsigned int CUBE_VAO;
 unsigned int PLANE_VAO;
+unsigned int GRID_VAO;
 
 unsigned int shaderID;
 
 //draw Objects / Scene
 Scene scene_1;
 Map map;
+std::list<targetObject> moveList;
+    //Building / placing new Objects
+bool placeGhost = false;
+GhostGO ghostBuilding;
+
+bool moveUnit = false;
 
 //Selection
 SelectionManager* selManager;
@@ -103,10 +110,10 @@ int main()
     GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
-    scene_1.SceneList.push_back(cube1);
-    scene_1.SceneList.push_back(cube2);
-    scene_1.SceneList.push_back(cube3);
-    scene_1.SceneList.push_back(cube4);
+    scene_1.SceneList.push_back(&cube1);
+    scene_1.SceneList.push_back(&cube2);
+    scene_1.SceneList.push_back(&cube3);
+    scene_1.SceneList.push_back(&cube4);
 
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
@@ -117,6 +124,7 @@ int main()
     //vertex input into buffer
     createCubeVAO();
     createPlaneVAO();
+    createGridVAO();
 #pragma endregion
 
 #pragma region ImGuI
@@ -164,14 +172,17 @@ int main()
         //render Objects
         scene_1.active = true;              //set scene as active
         if (scene_1.active) {
-            for (GameObject g : scene_1.SceneList)
+            for (GameObject* g : scene_1.SceneList)
             {
                 drawCube(shader.ID, g);
             }
+            if (placeGhost) {
+                drawGhostObject(shaderID, &ghostBuilding);
+            }
         }
 
-        drawPlane(shader.ID, map);
-        //drawPickingPlane(shaderID, map);          //debug
+        drawPlane(shader.ID, &map);
+        //drawPickingPlane(shaderID, &map);          //debug
 
 #pragma region UI content
         //ImGui UIRight
@@ -182,7 +193,8 @@ int main()
         if (ImGui::BeginTabBar("tabs")) {
             if (ImGui::BeginTabItem("Buildings")) {
                 if (ImGui::Button("Building 1", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                    std::cout << "Building 1" << std::endl;
+                    GhostGO gGO = GhostGO("NewBuilding", glm::vec3(1,2,1), RGB(0,0,100), false, GameObject::GameObjectType::Building);
+                    ghostBuilding = gGO;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Building 2", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
@@ -207,14 +219,14 @@ int main()
             ImGui::SetWindowSize(ImVec2((screenWidth - (screenWidth * UIpercentageRight)), (screenHeight - UIbottom)));
 
             std::list<int> checkedtypes;
-            std::list<GameObject> newSel;
-            for (GameObject selected : selManager->selection) {
+            std::list<GameObject*> newSel;
+            for (GameObject* selected : selManager->selection) {
                 ImGui::SameLine();
                 if (checkedtypes.size() == 0) {
-                    checkedtypes.push_back((int)selected.type);
-                    if (ImGui::Button(selected.type_tostring((int)selected.type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
-                        for (GameObject withType : selManager->selection) {
-                            if (withType.type == selected.type) {
+                    checkedtypes.push_back((int)selected->type);
+                    if (ImGui::Button(selected->type_tostring((int)selected->type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
+                        for (GameObject* withType : selManager->selection) {
+                            if (withType->type == selected->type) {
                                 newSel.push_back(withType);
                             }
                         }
@@ -222,11 +234,11 @@ int main()
                     }
                 }
                 for (int i : checkedtypes) {
-                    if (i != (int)selected.type) {
-                        checkedtypes.push_back((int)selected.type);
-                        if (ImGui::Button(selected.type_tostring((int)selected.type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
-                            for (GameObject withType : selManager->selection) {
-                                if (withType.type == selected.type) {
+                    if (i != (int)selected->type) {
+                        checkedtypes.push_back((int)selected->type);
+                        if (ImGui::Button(selected->type_tostring((int)selected->type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
+                            for (GameObject* withType : selManager->selection) {
+                                if (withType->type == selected->type) {
                                     newSel.push_back(withType);
                                 }
                             }
@@ -274,6 +286,15 @@ int main()
                 moveCamera(Direction::right);
             if (x < screenLeft)
                 moveCamera(Direction::left);
+        }
+
+        if (moveList.size() > 0) {
+            for (targetObject t : moveList) {
+                moveGameObject(&t);
+
+                if (moveList.size() == 0)
+                    break;
+            }
         }
 
         //check events and swap buffers
@@ -385,6 +406,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             break;
         }
     }
+
+    if (key == GLFW_KEY_Q && action != GLFW_RELEASE) {
+        if (ghostBuilding.name != "") {
+            ghostBuilding.rotate(-30 * (1 - deltaTime));
+        }
+    }
+
+    if (key == GLFW_KEY_E && action != GLFW_PRESS) {
+        if (ghostBuilding.name != "") {
+            ghostBuilding.rotate(30 * (1 - deltaTime));
+        }
+    }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {  
@@ -392,104 +425,121 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         moveCam = true;
     else
         moveCam = false;
+
+    if (ghostBuilding.name != "") {
+        ghostPosition(window, &ghostBuilding, &map);
+        placeGhost = true;
+    }
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     double pixelX = 1, pixelY = 1;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glUseProgram(shaderID);
-        
-        int projectloc = glGetUniformLocation(shaderID, "projection");
-        glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
-        int viewloc = glGetUniformLocation(shaderID, "view");
-        glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+        //Selection
+        if (ghostBuilding.name == "") {
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glUseProgram(shaderID);
 
-        int objects = 0;
-        for (GameObject Go : scene_1.SceneList)
-        {
-            if(Go.selectable)
-                drawCubePicking(shaderID, Go, objects);
-            objects++;
-        }
+            int projectloc = glGetUniformLocation(shaderID, "projection");
+            glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
+            int viewloc = glGetUniformLocation(shaderID, "view");
+            glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
 
-        glFlush();
-        glFinish();
+            int objects = 0;
+            for (GameObject* Go : scene_1.SceneList)
+            {
+                if (Go->selectable)
+                    drawCubePicking(shaderID, Go, objects);
+                objects++;
+            }
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glFlush();
+            glFinish();
 
-        double xRelease, yRelease;
-        glfwGetCursorPos(window, &xRelease, &yRelease);
-        yRelease = screenHeight - yRelease;
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        //calculated bottom left of square
-        double centerX = 0, centerY = 0;
-        double bottomLeftX = 0, bottomLeftY = 0;
-        if (xPress != xRelease || yPress != yRelease) {
-            pixelX = xRelease - xPress;
-            pixelY = yRelease - yPress;
-            pixelX = glm::abs(pixelX);          //size of square
-            pixelY = glm::abs(pixelY);
+            double xRelease, yRelease;
+            glfwGetCursorPos(window, &xRelease, &yRelease);
+            yRelease = screenHeight - yRelease;
 
-            if (xPress > xRelease)                  //calculate center
-                centerX = xPress - (pixelX / 2);
-            else if (xPress < xRelease)
-                centerX = xRelease - (pixelX / 2);
-            if (yPress > yRelease)
-                centerY = yPress - (pixelY / 2);
-            else if (yPress < yRelease)
-                centerY = yRelease - (pixelY / 2);
+            //calculated bottom left of square
+            double centerX = 0, centerY = 0;
+            double bottomLeftX = 0, bottomLeftY = 0;
+            if (xPress != xRelease || yPress != yRelease) {
+                pixelX = xRelease - xPress;
+                pixelY = yRelease - yPress;
+                pixelX = glm::abs(pixelX);          //size of square
+                pixelY = glm::abs(pixelY);
 
-            bottomLeftX = centerX - (pixelX / 2);       //calc bottom left
-            bottomLeftY = centerY - (pixelY / 2);
-        }
-        else {
-            bottomLeftX = xPress;           //if only clicked (no multi-selection)
-            bottomLeftY = yPress;
-        }
+                if (xPress > xRelease)                  //calculate center
+                    centerX = xPress - (pixelX / 2);
+                else if (xPress < xRelease)
+                    centerX = xRelease - (pixelX / 2);
+                if (yPress > yRelease)
+                    centerY = yPress - (pixelY / 2);
+                else if (yPress < yRelease)
+                    centerY = yRelease - (pixelY / 2);
 
-        unsigned char* data = new unsigned char[pixelX * pixelY * 4];
+                bottomLeftX = centerX - (pixelX / 2);       //calc bottom left
+                bottomLeftY = centerY - (pixelY / 2);
+            }
+            else {
+                bottomLeftX = xPress;           //if only clicked (no multi-selection)
+                bottomLeftY = yPress;
+            }
 
-        if (yRelease > screenHeight * UIpercentageBottom) {
-            selManager->selection.clear();
-        }
+            unsigned char* data = new unsigned char[pixelX * pixelY * 4];
 
-        glReadPixels(bottomLeftX, bottomLeftY, pixelX, pixelY, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
-
-        std::list<int> pickedIDs = std::list<int>();
-
-        for (int i = 0; i < pixelX * pixelY * 4; i += 4) {
-            int pickedID = data[i] + data[i + 1] * 256 + data[i + 2] * 256 * 256;
-            pickedIDs.push_back(pickedID);
-            pickedIDs.sort();
-            pickedIDs.unique();
-        }
-
-        if (pickedIDs.size() == 1 && pickedIDs.front() == 0x00ffffff) {                 //if only Background was selected
-            //std::cout << "Background -- Selection Cleared" << std::endl;
             if (yRelease > screenHeight * UIpercentageBottom) {
                 selManager->selection.clear();
             }
-                
-        }
 
-        for (int ID : pickedIDs) {
-            if (ID == 0x00ffffff) {
-                continue;       //skip over background ID
+            glReadPixels(bottomLeftX, bottomLeftY, pixelX, pixelY, GL_RGBA, GL_UNSIGNED_BYTE, data);          //where start (lower left x+y), size 1,1 = one pixel, type, where to save
+
+            std::list<int> pickedIDs = std::list<int>();
+
+            for (int i = 0; i < pixelX * pixelY * 4; i += 4) {
+                int pickedID = data[i] + data[i + 1] * 256 + data[i + 2] * 256 * 256;
+                pickedIDs.push_back(pickedID);
+                pickedIDs.sort();
+                pickedIDs.unique();
             }
-            else {
-                if (scene_1.active) {
-                    GameObject picked = scene_1.getGameObject(scene_1.SceneList, ID);
 
-                    selManager->selection.push_back(picked);            //add picked GameObject to selection
-                    selManager->selection.unique();                 //remove any GameObject twice in the list
+            if (pickedIDs.size() == 1 && pickedIDs.front() == 0x00ffffff) {                 //if only Background was selected
+                if (yRelease > screenHeight * UIpercentageBottom) {
+                    selManager->selection.clear();
+                }
+
+            }
+
+            for (int ID : pickedIDs) {
+                if (ID == 0x00ffffff) {
+                    continue;       //skip over background ID
+                }
+                else {
+                    if (scene_1.active) {
+                        GameObject* picked = scene_1.getGameObject(&scene_1.SceneList, ID);
+
+                        selManager->selection.push_back(picked);            //add picked GameObject to selection
+                        selManager->selection.unique();                 //remove any GameObject twice in the list
+                    }
                 }
             }
+
+            glfwSwapBuffers(window);
         }
-        
-        glfwSwapBuffers(window);
+
+        //Building
+        if (ghostBuilding.name != "") {
+            if (ghostBuilding.tmp_position.y != -10) {
+                GameObject* ghostToGo = ghostBuilding.placeGhost();
+                ghostBuilding = GhostGO();
+                placeGhost = false;
+                scene_1.SceneList.push_back(ghostToGo);
+            }
+        }
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
@@ -508,7 +558,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             int viewloc = glGetUniformLocation(shaderID, "view");
             glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
 
-            drawPickingPlane(shaderID, map);
+            drawPickingPlane(shaderID, &map);
+            int cubes = 0;
+            for (GameObject* draw : scene_1.SceneList) {
+                drawCubePicking(shaderID, draw, cubes);
+                cubes++;
+            }
 
             glFlush();
             glFinish();
@@ -521,14 +576,32 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
             unsigned char* data = new unsigned char[4];
             glReadPixels(xRelease, yRelease, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            int picked_r = data[0];
             int picked_X = data[1];
             int picked_Y = data[2];
-            if (picked_X + picked_Y == 336)
+
+            if (picked_X + picked_Y == 510)
                 std::cout << "not clicked on Map" << std::endl;
+            
+            else if (picked_r != 0 || picked_r == 0 && picked_X == 0 && picked_Y == 0)      //any GO was selected as move target
+                std::cout << "Blocked" << '\n';                 //for now, doesnt move
+
             else {
-                std::cout << picked_X << " / " << picked_Y << std::endl;
-                for (GameObject selected : selManager->selection) {
-                    //move
+                for (GameObject* selected : selManager->selection) {
+                    if (moveList.size() > 0) {
+                        for (targetObject const t : moveList) {
+                            if (t.go == selected) {
+                                moveList.remove(t);
+                                break;
+                            }
+                        }
+                    }
+
+                    targetObject target;
+                    target.go = selected;
+                    target.tX = picked_X;
+                    target.tY = picked_Y;
+                    moveList.push_back(target);
                 }
             }
         }
@@ -685,12 +758,48 @@ void createPlaneVAO()
     glDeleteBuffers(1, &VBO);
 }
 
-void drawCube(const unsigned int shaderID, const GameObject toDraw) {
+void createGridVAO() {
+    float planeVertices[] = {
+    -0.5f / GRID_MULTI, -0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+     0.5f / GRID_MULTI, -0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+     0.5f / GRID_MULTI,  0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+     0.5f / GRID_MULTI,  0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+    -0.5f / GRID_MULTI,  0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+    -0.5f / GRID_MULTI, -0.5f / GRID_MULTI, -0.5f / GRID_MULTI,
+    };
+
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    unsigned int VBO, EBO;
+    glGenVertexArrays(1, &GRID_VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(GRID_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &VBO);
+}
+
+void drawCube(const unsigned int shaderID, const GameObject* toDraw) {
     glBindVertexArray(CUBE_VAO);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, toDraw.position);
-    model = glm::rotate(model, glm::radians(toDraw.angle), glm::vec3(1.0f, 0.3f, 0.5f));
-    model = glm::scale(model, toDraw.scale);
+    model = glm::translate(model, toDraw->position);
+    model = glm::rotate(model, glm::radians(toDraw->angle), glm::vec3(0, 1, 0));
+    model = glm::scale(model, toDraw->scale);
 
     int modelloc = glGetUniformLocation(shaderID, "model");
     glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
@@ -707,15 +816,15 @@ void drawCube(const unsigned int shaderID, const GameObject toDraw) {
             b = selManager->selectionColor.z;
         }
         else {
-            r = toDraw.color.x;                 //set Color of the GameObject
-            g = toDraw.color.y;
-            b = toDraw.color.z;
+            r = toDraw->color.x;                 //set Color of the GameObject
+            g = toDraw->color.y;
+            b = toDraw->color.z;
         }
     }
     else {
-        r = toDraw.color.x;
-        g = toDraw.color.y;
-        b = toDraw.color.z;
+        r = toDraw->color.x;
+        g = toDraw->color.y;
+        b = toDraw->color.z;
     }
 
     int vertexcolor = glGetUniformLocation(shaderID, "color");          //sent color values to shader
@@ -724,12 +833,12 @@ void drawCube(const unsigned int shaderID, const GameObject toDraw) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const int nr) {
+void drawCubePicking(const unsigned int shaderID, const GameObject* toDraw, const int nr) {
     glBindVertexArray(CUBE_VAO);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, toDraw.position);
-    model = glm::rotate(model, glm::radians(toDraw.angle), glm::vec3(1.0f, 0.3f, 0.5f));
-    model = glm::scale(model, toDraw.scale);
+    model = glm::translate(model, toDraw->position);
+    model = glm::rotate(model, glm::radians(toDraw->angle), glm::vec3(0, 1, 0));
+    model = glm::scale(model, toDraw->scale);
 
     int modelloc = glGetUniformLocation(shaderID, "model");
     glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
@@ -745,20 +854,20 @@ void drawCubePicking(const unsigned int shaderID, const GameObject toDraw, const
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void drawPlane(const unsigned int shaderID, const Map map) {
+void drawPlane(const unsigned int shaderID, const Map *map) {
     glBindVertexArray(PLANE_VAO);
-    for (unsigned int i = 0; i < map.mapSize.x * map.mapSize.y; i++) {
+    for (unsigned int i = 0; i < map->mapSize.x * map->mapSize.y; i++) {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, map.mapPosition[i]);
+        model = glm::translate(model, map->mapPosition[i]);
         float angle = 90;
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 
         int modelloc = glGetUniformLocation(shaderID, "model");
         glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
-        float r = map.mapColor.x;
-        float g = map.mapColor.y;
-        float b = map.mapColor.z;
+        float r = map->mapColor.x;
+        float g = map->mapColor.y;
+        float b = map->mapColor.z;
         int vertexcolor = glGetUniformLocation(shaderID, "color");
         glUniform3f(vertexcolor, r, g, b);
 
@@ -766,12 +875,12 @@ void drawPlane(const unsigned int shaderID, const Map map) {
     }
 }
 
-void drawPickingPlane(const unsigned int shaderID, const Map map) {
-    glBindVertexArray(PLANE_VAO);
-    for (unsigned int i = 0; i < map.mapSize.x * GRID_MULTI; i++) {
-        for (unsigned int j = 0; j < map.mapSize.y * GRID_MULTI; j++) {
+void drawPickingPlane(const unsigned int shaderID, const Map *map) {
+    glBindVertexArray(GRID_VAO);
+    for (unsigned int i = 0; i < map->mapSize.x * GRID_MULTI; i++) {
+        for (unsigned int j = 0; j < map->mapSize.y * GRID_MULTI; j++) {
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, map.grid[i][j]);
+            model = glm::translate(model, map->grid[i][j]);
             float angle = 90;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -790,4 +899,71 @@ void drawPickingPlane(const unsigned int shaderID, const Map map) {
         }
     }
 }
+
+void drawGhostObject(unsigned int shaderID, GhostGO* toDraw) {
+    glBindVertexArray(CUBE_VAO);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, toDraw->tmp_position);
+    model = glm::rotate(model, glm::radians(toDraw->angle), glm::vec3(0, 1, 0));
+    model = glm::scale(model, toDraw->scale);
+
+    int modelloc = glGetUniformLocation(shaderID, "model");
+    glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+    //set color for cubes
+    float r = toDraw->color.x;
+    float g = toDraw->color.y;
+    float b = toDraw->color.z;
+
+    int vertexcolor = glGetUniformLocation(shaderID, "color");          //sent color values to shader
+    glUniform3f(vertexcolor, r, g, b);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map) {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(shaderID);
+
+    int projectloc = glGetUniformLocation(shaderID, "projection");
+    glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
+    int viewloc = glGetUniformLocation(shaderID, "view");
+    glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+
+    drawPickingPlane(shaderID, map);
+
+    glFlush();
+    glFinish();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    double xRelease, yRelease;
+    glfwGetCursorPos(window, &xRelease, &yRelease);
+    yRelease = screenHeight - yRelease;
+
+    unsigned char* data = new unsigned char[4];
+    glReadPixels(xRelease, yRelease, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    int picked_X = data[1];
+    int picked_Y = data[2];
+    if (picked_X + picked_Y != 510) {
+        glm::vec3 pos = glm::vec3(map->grid[picked_X][picked_Y].x, map->grid[picked_X][picked_Y].y + (ghost->scale.y), map->grid[picked_X][picked_Y].z);
+        ghost->tmp_position = pos;
+    }
+}
+#pragma endregion
+
+#pragma region Gameplay
+void moveGameObject(targetObject* target) {
+    glm::vec3 newPos = glm::mix(target->go->position, map.grid[target->tX][target->tY], deltaTime);
+    target->dist = glm::distance(newPos, map.grid[target->tX][target->tY]);
+
+    if (target->dist > 0.8) {
+        target->go->position = glm::vec3(newPos.x, target->go->position.y, newPos.z);
+    }
+    else {
+        moveList.remove(*target);
+    }
+}
+
 #pragma endregion

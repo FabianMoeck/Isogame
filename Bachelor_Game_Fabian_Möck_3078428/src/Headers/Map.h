@@ -2,6 +2,9 @@
 #define MAP_H
 
 #include <glm/glm.hpp>
+//Wip
+#include "GameObject.h"
+#include <list>
 
 class Map
 {
@@ -25,6 +28,9 @@ private:
 	glm::vec3* initMap(const int mapSizeX, const int mapSizeY);
 
 	glm::vec3** initGrid(const int sizeX, const int sizeY);
+
+	/*glm::vec2 mapToGrid(glm::vec3 mapCord);
+	void blockedGrid(const std::list<GameObject> sceneObjects);*/
 };
 
 #endif // !MAP_H

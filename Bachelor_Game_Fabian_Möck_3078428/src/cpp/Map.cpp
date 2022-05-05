@@ -1,4 +1,5 @@
 #include "../Headers/Map.h"
+#include <iostream>
 
 Map::Map() {
 
@@ -55,9 +56,21 @@ glm::vec3** Map::initGrid(const int sizeX, const int sizeY) {
     {
         for (int j = 0; j < sizeY * gridMultiplier; j++)
         {
-            gridPosition[i][j] = glm::vec3(0.0f + i/ gridMultiplier, -0.5f, 0.0f + j/ gridMultiplier);
+            float x = i, y = j;
+            gridPosition[i][j] = glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier);
         }
     }
 
     return gridPosition;
 }
+
+//glm::vec2 Map::mapToGrid(glm::vec3 mapCord) {
+//
+//}
+//
+//void Map::blockedGrid(const std::list<GameObject> sceneObjects) {
+//    for (GameObject inScene : sceneObjects) {
+//        glm::vec2 goGridPos = mapToGrid(inScene.position);
+//
+//    }
+//}

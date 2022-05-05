@@ -34,7 +34,7 @@ public:
 	~GameObject();
     friend bool operator==(const GameObject first, const GameObject second);
     friend bool operator!=(const GameObject first, const GameObject second);
-    void move(const glm::vec3** grid, const int _X, const int _Y);
+    void teleportObject(glm::vec3** grid, const int _X, const int _Y);
 
     float* CubeVertices();
     unsigned int* Indices();

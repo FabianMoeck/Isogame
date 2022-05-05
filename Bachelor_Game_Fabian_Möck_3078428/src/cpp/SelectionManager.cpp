@@ -12,16 +12,16 @@ SelectionManager* SelectionManager::getInstance()
 	return instance;
 }
 
-std::list<GameObject> SelectionManager::returnSelection(const int index) {
+std::list<GameObject*> SelectionManager::returnSelection(const int index) {
 	SelectionManager* s = SelectionManager::getInstance();
 	return s->savedSelections[index];
 }
 
-void SelectionManager::saveSelection(const std::list<GameObject> currentSelection, const int index) {
+void SelectionManager::saveSelection(const std::list<GameObject*> currentSelection, const int index) {
 	SelectionManager* s = SelectionManager::getInstance();
 	s->savedSelections[index] = currentSelection;
 }
 
-void SelectionManager::setSelection(const std::list<GameObject> newSelection) {
+void SelectionManager::setSelection(const std::list<GameObject*> newSelection) {
 	selection = newSelection;
 }

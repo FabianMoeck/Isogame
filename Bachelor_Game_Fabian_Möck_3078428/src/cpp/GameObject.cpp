@@ -1,4 +1,5 @@
 #include "../Headers/GameObject.h"
+#include <iostream>
 
 bool operator==(const GameObject first, const GameObject second) {
     return (first.name == second.name);
@@ -8,8 +9,9 @@ bool operator!=(const GameObject first, const GameObject second) {
     return (first.name != second.name);
 }
 
-void GameObject::move(const glm::vec3** grid, const int _X, const int _Y) {
-
+void GameObject::teleportObject(glm::vec3** grid, const int _X, const int _Y) {
+    glm::vec3 newPos = glm::vec3(grid[_X][_Y].x, position.y, grid[_X][_Y].z);
+    position = newPos;
 }
 
 GameObject::GameObject() {

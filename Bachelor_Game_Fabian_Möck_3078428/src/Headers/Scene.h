@@ -9,12 +9,12 @@ class Scene
 {
 public:
 	bool active;
-	std::list<GameObject> SceneList;
+	std::list<GameObject*> SceneList;
 
 	Scene();
 	~Scene();
-	GameObject getGameObject(std::list<GameObject> list,const int index) {
-		std::list<GameObject>::iterator it = list.begin();
+	GameObject* getGameObject(std::list<GameObject*> *list,const int index) {
+		std::list<GameObject*>::const_iterator it = list->begin();
 		for (unsigned int i = 0; i < index; i++)
 		{
 			it++;
