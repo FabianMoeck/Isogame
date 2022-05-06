@@ -880,7 +880,7 @@ void drawPickingPlane(const unsigned int shaderID, const Map *map) {
     for (unsigned int i = 0; i < map->mapSize.x * GRID_MULTI; i++) {
         for (unsigned int j = 0; j < map->mapSize.y * GRID_MULTI; j++) {
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, map->grid[i][j]);
+            model = glm::translate(model, map->grid[i][j]->position);
             float angle = 90;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -888,12 +888,16 @@ void drawPickingPlane(const unsigned int shaderID, const Map *map) {
             glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
 
             //set color for cubes
-            //int r = (i & 0x000000FF) >> 0;                //ignore red
+            float r = 0.0f;               //ignore red
             int g = (i * 256 & 0x0000FF00) >> 8;
-            int b = (j * (256*256) & 0x00FF0000) >> 16; 
+            int b = (j * (256*256) & 0x00FF0000) >> 16;
+
+            if (map->grid[i][j]->blocked) {
+                r = 255.0f;
+            }
 
             int vertexcolor = glGetUniformLocation(shaderID, "color");
-            glUniform3f(vertexcolor, 0.0f, g / 255.0f, b / 255.0f);
+            glUniform3f(vertexcolor, r / 255.0f, g / 255.0f, b / 255.0f);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
@@ -947,7 +951,7 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map) {
     int picked_X = data[1];
     int picked_Y = data[2];
     if (picked_X + picked_Y != 510) {
-        glm::vec3 pos = glm::vec3(map->grid[picked_X][picked_Y].x, map->grid[picked_X][picked_Y].y + (ghost->scale.y), map->grid[picked_X][picked_Y].z);
+        glm::vec3 pos = glm::vec3(map->grid[picked_X][picked_Y]->position.x, map->grid[picked_X][picked_Y]->position.y + (ghost->scale.y), map->grid[picked_X][picked_Y]->position.z);
         ghost->tmp_position = pos;
     }
 }
@@ -955,8 +959,8 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map) {
 
 #pragma region Gameplay
 void moveGameObject(targetObject* target) {
-    glm::vec3 newPos = glm::mix(target->go->position, map.grid[target->tX][target->tY], deltaTime);
-    target->dist = glm::distance(newPos, map.grid[target->tX][target->tY]);
+    glm::vec3 newPos = glm::mix(target->go->position, map.grid[target->tX][target->tY]->position, deltaTime);
+    target->dist = glm::distance(newPos, map.grid[target->tX][target->tY]->position);
 
     if (target->dist > 0.8) {
         target->go->position = glm::vec3(newPos.x, target->go->position.y, newPos.z);

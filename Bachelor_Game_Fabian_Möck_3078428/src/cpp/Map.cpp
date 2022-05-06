@@ -47,17 +47,21 @@ glm::vec3* Map::initMap(const int mapSizeX, const int mapSizeY)
     return initMap(glm::vec2(mapSizeX, mapSizeY));
 }
 
-glm::vec3** Map::initGrid(const int sizeX, const int sizeY) {
-    glm::vec3** gridPosition = new glm::vec3 * [sizeX * gridMultiplier];
+Node*** Map::initGrid(const int sizeX, const int sizeY) {
+    Node*** gridPosition = new Node **[sizeX * gridMultiplier];
     for (int i = 0; i < sizeX * gridMultiplier; ++i)
-        gridPosition[i] = new glm::vec3[sizeY * gridMultiplier];
+        gridPosition[i] = new Node*[sizeY * gridMultiplier];
 
     for (int i = 0; i < sizeX * gridMultiplier; i++)
     {
         for (int j = 0; j < sizeY * gridMultiplier; j++)
         {
             float x = i, y = j;
-            gridPosition[i][j] = glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier);
+            if (i == 0 && j == 0) {
+                gridPosition[i][j] = new Node(glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier), true);
+            }
+            else
+                gridPosition[i][j] = new Node(glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier), false);
         }
     }
 
