@@ -5,9 +5,11 @@
 
 #define MAPSIZE_X 10
 #define MAPSIZE_Y 10
-#define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10 times)
+#define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 //work in Porgress
+#include "Pathfinding.h"
+#include "PathRequest.h"
 
 #pragma region Variables
 //Screen
@@ -106,10 +108,11 @@ int main()
 #pragma region Scene/GameObjects
     //init Scene and GO's
     scene_1 = Scene();
-    GameObject cube1 = GameObject("TestUnit_1", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
+    GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
+
     scene_1.SceneList.push_back(&cube1);
     scene_1.SceneList.push_back(&cube2);
     scene_1.SceneList.push_back(&cube3);
@@ -120,6 +123,14 @@ int main()
 
     //Map
     map = Map(MAPSIZE_X,MAPSIZE_Y, RGB(17.0f, 138.0f, 19.0f), GRID_MULTI);
+    map.updateGrid(&scene_1.SceneList);
+
+    //Pathfinding
+    Pathfinding pathFinding = Pathfinding(&map);
+    std::list<glm::vec3*> path = pathFinding.findPath(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(5.0f, 0.5f, 2.0f));
+    for (const glm::vec3* v : path) {
+        std::cout << *v << '\n';
+    }
 
     //vertex input into buffer
     createCubeVAO();
@@ -181,8 +192,8 @@ int main()
             }
         }
 
-        drawPlane(shader.ID, &map);
-        //drawPickingPlane(shaderID, &map);          //debug
+        //drawPlane(shader.ID, &map);
+        drawPickingPlane(shaderID, &map);          //debug
 
 #pragma region UI content
         //ImGui UIRight
@@ -193,7 +204,7 @@ int main()
         if (ImGui::BeginTabBar("tabs")) {
             if (ImGui::BeginTabItem("Buildings")) {
                 if (ImGui::Button("Building 1", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                    GhostGO gGO = GhostGO("NewBuilding", glm::vec3(1,2,1), RGB(0,0,100), false, GameObject::GameObjectType::Building);
+                    GhostGO gGO = GhostGO("NewBuilding", glm::vec3(1.0f, 2.0f, 1.0f), RGB(0,0,100), false, GameObject::GameObjectType::Building);
                     ghostBuilding = gGO;
                 }
                 ImGui::SameLine();
@@ -538,6 +549,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 ghostBuilding = GhostGO();
                 placeGhost = false;
                 scene_1.SceneList.push_back(ghostToGo);
+                map.updateGrid(&scene_1.SceneList);
             }
         }
     }
@@ -559,11 +571,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
 
             drawPickingPlane(shaderID, &map);
-            int cubes = 0;
-            for (GameObject* draw : scene_1.SceneList) {
-                drawCubePicking(shaderID, draw, cubes);
-                cubes++;
-            }
 
             glFlush();
             glFinish();
@@ -616,19 +623,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         fov = 45.0f;
 }
 #pragma endregion
-
-void moveCamera(Direction direction) {
-    float cameraSpeed = 10.0f * deltaTime;                   //adjust accordingly
-    glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
-    if (direction == Direction::forward)
-        cameraPos += cameraSpeed * xzPlane * cameraFront;
-    if (direction == Direction::back)
-        cameraPos -= cameraSpeed * xzPlane * cameraFront;
-    if (direction == Direction::left)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (direction == Direction::right)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-}
 
 #pragma region Util
 glm::vec3 RGB(const float _R, const float _G, const float _B) {
@@ -892,7 +886,7 @@ void drawPickingPlane(const unsigned int shaderID, const Map *map) {
             int g = (i * 256 & 0x0000FF00) >> 8;
             int b = (j * (256*256) & 0x00FF0000) >> 16;
 
-            if (map->grid[i][j]->blocked) {
+            if (!map->grid[i][j]->walkable) {
                 r = 255.0f;
             }
 
@@ -958,6 +952,19 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map) {
 #pragma endregion
 
 #pragma region Gameplay
+void moveCamera(Direction direction) {
+    float cameraSpeed = 10.0f * deltaTime;                   //adjust accordingly
+    glm::vec3 xzPlane = glm::vec3(1.0f, 0.0f, 1.0f);              //vector on xz plane
+    if (direction == Direction::forward)
+        cameraPos += cameraSpeed * xzPlane * cameraFront;
+    if (direction == Direction::back)
+        cameraPos -= cameraSpeed * xzPlane * cameraFront;
+    if (direction == Direction::left)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (direction == Direction::right)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
 void moveGameObject(targetObject* target) {
     glm::vec3 newPos = glm::mix(target->go->position, map.grid[target->tX][target->tY]->position, deltaTime);
     target->dist = glm::distance(newPos, map.grid[target->tX][target->tY]->position);
@@ -967,6 +974,7 @@ void moveGameObject(targetObject* target) {
     }
     else {
         moveList.remove(*target);
+        map.updateGrid(&scene_1.SceneList);
     }
 }
 

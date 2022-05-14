@@ -54,3 +54,4 @@ struct targetObject {
     bool operator==(const targetObject& t)const { if (go == t.go)return true; };
 };
 void moveGameObject(targetObject* target);
+void moveOnPath(GameObject* g, glm::vec3* path);

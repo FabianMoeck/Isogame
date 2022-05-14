@@ -90,6 +90,15 @@
     <ClCompile Include="Node.cpp">
       <Filter>Source Files\Pathfinding</Filter>
     </ClCompile>
+    <ClCompile Include="Pathfinding.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="PathfindingManager.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="PathRequest.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Headers\Shader.h">
@@ -144,6 +153,15 @@
       <Filter>Header Files\GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="Node.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="Pathfinding.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="PathfindingManager.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="PathRequest.h">
       <Filter>Header Files\Pathfinding</Filter>
     </ClInclude>
   </ItemGroup>
