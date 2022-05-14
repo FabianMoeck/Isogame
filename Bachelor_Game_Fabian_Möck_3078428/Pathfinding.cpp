@@ -17,7 +17,7 @@ std::list<glm::vec3*> Pathfinding::findPath(glm::vec3 startPos, glm::vec3 target
 	Node* startN = map->nodeFromMap(startPos);
 	Node* endN = map->nodeFromMap(targetPos);
 
-	if (startN->walkable && endN->walkable) {
+	if (endN->walkable) {
 		std::unordered_set<Node*> openSet = std::unordered_set<Node*>();
 		std::unordered_set<Node*> closedSet = std::unordered_set<Node*>();
 		openSet.insert(startN);

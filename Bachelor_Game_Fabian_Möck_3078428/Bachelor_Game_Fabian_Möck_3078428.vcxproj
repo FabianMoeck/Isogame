@@ -156,7 +156,6 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
-    <ClCompile Include="PathfindingManager.cpp" />
     <ClCompile Include="PathRequest.cpp" />
     <ClCompile Include="src\cpp\GameObject.cpp" />
     <ClCompile Include="src\cpp\GhostGameObject.cpp" />
@@ -177,7 +176,6 @@
     <ClInclude Include="Main.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Pathfinding.h" />
-    <ClInclude Include="PathfindingManager.h" />
     <ClInclude Include="PathRequest.h" />
     <ClInclude Include="src\Headers\Camera.h" />
     <ClInclude Include="src\Headers\GameObject.h" />

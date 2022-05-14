@@ -44,14 +44,3 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map);
 
 //color
 glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
-
-struct targetObject {
-    GameObject* go;
-    int tX;
-    int tY;
-    float dist = 0;
-
-    bool operator==(const targetObject& t)const { if (go == t.go)return true; };
-};
-void moveGameObject(targetObject* target);
-void moveOnPath(GameObject* g, glm::vec3* path);

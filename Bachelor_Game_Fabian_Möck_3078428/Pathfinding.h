@@ -1,5 +1,5 @@
 #ifndef PATHFINDING_H
-#define PATHNFIDING_G
+#define PATHFINDING_H
 
 #include <glm/glm.hpp>
 #include "src/Headers/Map.h"
@@ -9,7 +9,7 @@
 class Pathfinding
 {
 public:
-
+	Pathfinding() {};
 	Pathfinding(Map *_map);
 	~Pathfinding();
 

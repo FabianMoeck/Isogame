@@ -11,6 +11,9 @@
 #include "Pathfinding.h"
 #include "PathRequest.h"
 
+std::list<PathRequest> moveRequest;
+Pathfinding pathFinding;
+
 #pragma region Variables
 //Screen
 int screenHeight = INIT_SCREENHEIGTH;
@@ -26,12 +29,10 @@ unsigned int shaderID;
 //draw Objects / Scene
 Scene scene_1;
 Map map;
-std::list<targetObject> moveList;
-    //Building / placing new Objects
+
+//Building / placing new Objects
 bool placeGhost = false;
 GhostGO ghostBuilding;
-
-bool moveUnit = false;
 
 //Selection
 SelectionManager* selManager;
@@ -109,7 +110,7 @@ int main()
     //init Scene and GO's
     scene_1 = Scene();
     GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
-    GameObject cube2 = GameObject("Cube_White", glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
+    GameObject cube2 = GameObject("Cube_White", glm::vec3(4.0f, 0.0f, 4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Building);
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(-2.0f, 0.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::Unit_1);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(-3.0f, 0.0f, 3.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Unit_2);
 
@@ -126,11 +127,11 @@ int main()
     map.updateGrid(&scene_1.SceneList);
 
     //Pathfinding
-    Pathfinding pathFinding = Pathfinding(&map);
-    std::list<glm::vec3*> path = pathFinding.findPath(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(5.0f, 0.5f, 2.0f));
+    pathFinding = Pathfinding(&map);
+    /*std::list<glm::vec3*> path = pathFinding.findPath(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(5.0f, 0.5f, 2.0f));
     for (const glm::vec3* v : path) {
         std::cout << *v << '\n';
-    }
+    }*/
 
     //vertex input into buffer
     createCubeVAO();
@@ -299,12 +300,16 @@ int main()
                 moveCamera(Direction::left);
         }
 
-        if (moveList.size() > 0) {
-            for (targetObject t : moveList) {
-                moveGameObject(&t);
-
-                if (moveList.size() == 0)
-                    break;
+        if (moveRequest.size() > 0) {
+            for (PathRequest pr : moveRequest) {
+                if (pr.moving) {
+                    pr.move(deltaTime);
+                    if (!pr.moving) {
+                        moveRequest.remove(pr);
+                        map.updateGrid(&scene_1.SceneList);
+                        break;
+                    }
+                }
             }
         }
 
@@ -595,20 +600,17 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
             else {
                 for (GameObject* selected : selManager->selection) {
-                    if (moveList.size() > 0) {
-                        for (targetObject const t : moveList) {
-                            if (t.go == selected) {
-                                moveList.remove(t);
+                    if (moveRequest.size() > 0) {
+                        for (PathRequest const pr : moveRequest) {
+                            if (pr.moveGO == selected) {
+                                moveRequest.remove(pr);
                                 break;
                             }
                         }
                     }
 
-                    targetObject target;
-                    target.go = selected;
-                    target.tX = picked_X;
-                    target.tY = picked_Y;
-                    moveList.push_back(target);
+                    PathRequest pr = PathRequest(selected, map.grid[picked_X][picked_Y]->position, pathFinding);
+                    moveRequest.push_back(pr);
                 }
             }
         }
@@ -963,19 +965,6 @@ void moveCamera(Direction direction) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (direction == Direction::right)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-}
-
-void moveGameObject(targetObject* target) {
-    glm::vec3 newPos = glm::mix(target->go->position, map.grid[target->tX][target->tY]->position, deltaTime);
-    target->dist = glm::distance(newPos, map.grid[target->tX][target->tY]->position);
-
-    if (target->dist > 0.8) {
-        target->go->position = glm::vec3(newPos.x, target->go->position.y, newPos.z);
-    }
-    else {
-        moveList.remove(*target);
-        map.updateGrid(&scene_1.SceneList);
-    }
 }
 
 #pragma endregion
