@@ -17,6 +17,8 @@
 #include "src/Headers/SelectionManager.h"
 #include "src/Headers/Map.h"
 #include "src/Headers/ghostGameObject.h"
+#include "Pathfinding.h"
+#include "PathRequest.h"
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 

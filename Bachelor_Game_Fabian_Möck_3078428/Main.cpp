@@ -8,11 +8,9 @@
 #define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 //work in Porgress
-#include "Pathfinding.h"
-#include "PathRequest.h"
 
-std::list<PathRequest> moveRequest;
-Pathfinding pathFinding;
+//DEBUG
+bool debugDrawCubes = true;
 
 #pragma region Variables
 //Screen
@@ -33,6 +31,10 @@ Map map;
 //Building / placing new Objects
 bool placeGhost = false;
 GhostGO ghostBuilding;
+
+//Pathfinding
+std::list<PathRequest*> moveRequest;
+Pathfinding pathFinding;
 
 //Selection
 SelectionManager* selManager;
@@ -128,10 +130,6 @@ int main()
 
     //Pathfinding
     pathFinding = Pathfinding(&map);
-    /*std::list<glm::vec3*> path = pathFinding.findPath(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(5.0f, 0.5f, 2.0f));
-    for (const glm::vec3* v : path) {
-        std::cout << *v << '\n';
-    }*/
 
     //vertex input into buffer
     createCubeVAO();
@@ -176,7 +174,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);        //direction the camera is looking
+        glm::vec3 direction = glm::vec3(-0.637695f, -0.707106f, -0.305524f);        //direction the camera is looking (found by testing a bunch)
         cameraFront = glm::normalize(direction);
 
         projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
@@ -186,15 +184,18 @@ int main()
         if (scene_1.active) {
             for (GameObject* g : scene_1.SceneList)
             {
-                drawCube(shader.ID, g);
+                if(debugDrawCubes)
+                    drawCube(shader.ID, g);
             }
             if (placeGhost) {
                 drawGhostObject(shaderID, &ghostBuilding);
             }
         }
 
-        //drawPlane(shader.ID, &map);
-        drawPickingPlane(shaderID, &map);          //debug
+        if(debugDrawCubes)
+            drawPlane(shader.ID, &map);
+        else
+            drawPickingPlane(shaderID, &map);          //debug
 
 #pragma region UI content
         //ImGui UIRight
@@ -205,7 +206,7 @@ int main()
         if (ImGui::BeginTabBar("tabs")) {
             if (ImGui::BeginTabItem("Buildings")) {
                 if (ImGui::Button("Building 1", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                    GhostGO gGO = GhostGO("NewBuilding", glm::vec3(1.0f, 2.0f, 1.0f), RGB(0,0,100), false, GameObject::GameObjectType::Building);
+                    GhostGO gGO = GhostGO("NewBuilding", glm::vec3(1.0f, 1.0f, 1.0f), RGB(0,0,100), false, GameObject::GameObjectType::Building);
                     ghostBuilding = gGO;
                 }
                 ImGui::SameLine();
@@ -301,10 +302,10 @@ int main()
         }
 
         if (moveRequest.size() > 0) {
-            for (PathRequest pr : moveRequest) {
-                if (pr.moving) {
-                    pr.move(deltaTime);
-                    if (!pr.moving) {
+            for (PathRequest* pr : moveRequest) {
+                if (pr->moving) {
+                    pr->move(deltaTime);
+                    if (!pr->moving) {
                         moveRequest.remove(pr);
                         map.updateGrid(&scene_1.SceneList);
                         break;
@@ -433,6 +434,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (ghostBuilding.name != "") {
             ghostBuilding.rotate(30 * (1 - deltaTime));
         }
+    }
+
+    //DEBUG
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
+        debugDrawCubes = !debugDrawCubes;
     }
 }
 
@@ -575,6 +581,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             int viewloc = glGetUniformLocation(shaderID, "view");
             glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
 
+            int cubeNR = 0;
+            for (GameObject* g : scene_1.SceneList) {
+                drawCubePicking(shaderID, g, cubeNR);
+                cubeNR++;
+            }
+
             drawPickingPlane(shaderID, &map);
 
             glFlush();
@@ -595,21 +607,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
             if (picked_X + picked_Y == 510)
                 std::cout << "not clicked on Map" << std::endl;
             
-            else if (picked_r != 0 || picked_r == 0 && picked_X == 0 && picked_Y == 0)      //any GO was selected as move target
-                std::cout << "Blocked" << '\n';                 //for now, doesnt move
-
+            else if (picked_r != 0 || picked_r == 0 && picked_X == 0 && picked_Y == 0) {        //any GO was selected as move target
+                GameObject* attacking = scene_1.getGameObject(&scene_1.SceneList, picked_r);
+                std::cout << "Attack Object: " << attacking->name << '\n';
+            }
             else {
                 for (GameObject* selected : selManager->selection) {
                     if (moveRequest.size() > 0) {
-                        for (PathRequest const pr : moveRequest) {
-                            if (pr.moveGO == selected) {
+                        for (PathRequest* const pr : moveRequest) {
+                            if (pr->moveGO == selected) {
                                 moveRequest.remove(pr);
                                 break;
                             }
                         }
                     }
-
-                    PathRequest pr = PathRequest(selected, map.grid[picked_X][picked_Y]->position, pathFinding);
+                    std::cout << "Target: " << map.grid[picked_X][picked_Y]->position << '\n';
+                    PathRequest* pr = new PathRequest(selected, map.grid[picked_X][picked_Y]->position, pathFinding);
                     moveRequest.push_back(pr);
                 }
             }
