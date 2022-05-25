@@ -1,18 +1,28 @@
 #include "PathRequest.h"
 
-PathRequest::PathRequest(GameObject* _move, glm::vec3 _targetPos, Pathfinding _finder)
+
+PathRequest::PathRequest(GameObject* _move, glm::vec3 _targetPos, Pathfinding _finder, std::list<AttackRequest*>* _atkList)
 {
 	moving = true;
 	moveGO = _move;
 	targetPos = glm::vec3(_targetPos.x, _move->position.y, _targetPos.z);
 	current = 0;
+	atkList = _atkList;
 
 	path = _finder.findPath(_move->position, targetPos);
-	std::cout << "Path found: \n";
-	for (glm::vec3* v : path) {
-		std::cout << v->x << "/" << v->z << '\n';
-	}
-	std::cout << '\n';
+}
+
+PathRequest::PathRequest(GameObject* _move, GameObject* _targetObject, Pathfinding _finder, std::list<AttackRequest*> *_atkList) {
+	targetObject = _targetObject;
+	glm::vec3 _targetPos = findPosition(_move, _targetObject);
+	atkList = _atkList;
+
+	moveGO = _move;
+	moving = true;
+	targetPos = glm::vec3(_targetPos.x, _move->position.y, _targetPos.z);
+	current = 0;
+
+	path = _finder.findPath(_move->position, targetPos);
 }
 
 PathRequest::~PathRequest()
@@ -27,19 +37,65 @@ void PathRequest::move(float _deltaTime) {
 			newTarget = get(&path, current);			//get current Path target
 		}
 
+		if (atkList->size() > 0) {						//stop attacking when new Move command
+			ITroop* t = (ITroop*)moveGO->u;
+			for (AttackRequest* ar : *atkList) {
+				if (ar->atk == t) {
+					atkList->remove(ar);
+					break;
+				}
+			}
+		}
+
 		if (current != path.size()) {							//current Target is not the last in Path
 			float cDist = glm::distance(moveGO->position, *newTarget);		//get distance between current pos and Pathtarget
 			if (cDist > 0.8f) {									//distance is gretaer than 0.8
-				glm::vec3 newPos = glm::mix(moveGO->position, glm::vec3(newTarget->x, newTarget->y, newTarget->z), _deltaTime);			//move GO closer
+				glm::vec3 newPos = glm::mix(moveGO->position, glm::vec3(newTarget->x, newTarget->y, newTarget->z), moveGO->u->speed * _deltaTime);			//move GO closer
 				moveGO->position = glm::vec3(newPos.x, moveGO->position.y, newPos.z);
 			}
 			else {							//if distance is smaller than 0.8
-				current++;					//add one to current pos (theory next frame line 24 new distance)
+				current++;					//add one to current pos
 			}
 		}
-		else {
-			std::cout << "Moving false" << '\n';
+		else if (targetObject != nullptr) {
 			moving = false;
+			AttackRequest* atkRe = new AttackRequest((ITroop*)moveGO->u, targetObject->u);
+			atkList->push_back(atkRe);
 		}
+		else
+			moving = false;
 	}
+	else if (targetObject != nullptr) {
+		moving = false;
+		AttackRequest* atkRe = new AttackRequest((ITroop*)moveGO->u, targetObject->u);
+		atkList->push_back(atkRe);
+	}
+	else
+		moving = false;
+}
+
+glm::vec3 PathRequest::findPosition(GameObject* _move, GameObject* _target) {
+	ITroop* t = (ITroop *)_move->u;
+	float r = t->range;
+
+	glm::vec3 result = glm::vec3();
+	//std::cout <<"Dist/Rad: "<< glm::distance(_move->position, _target->position) << "/" << r << '\n';
+
+	if (glm::distance(_move->position, _target->position) > r) {
+		glm::vec3 dir = glm::normalize(_move->position - _target->position);
+		//std::cout << "Dir: " << dir.x << "/" << dir.z << '\n';
+		glm::vec3 a = dir * r;
+		//std::cout << "DirScaled: " << a.x << "/" << a.z << '\n';
+
+		//a = glm::abs(a) * 0.2f;
+		//std::cout << "DirABS: " << a.x << "/" << a.z << '\n';
+
+		result = _target->position + a;
+		//std::cout << "Res: " << result.x << "/" << result.z << '\n';
+	}
+	else {
+		result = _target->position;
+	}
+
+	return result;
 }

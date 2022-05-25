@@ -153,15 +153,26 @@
     <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\Dependencies\IMGUI\imgui_tables.cpp" />
     <ClCompile Include="..\Dependencies\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="AttackRequest.cpp" />
+    <ClCompile Include="Barracks.cpp" />
+    <ClCompile Include="Building.cpp" />
+    <ClCompile Include="BuildRequest.cpp" />
+    <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="FootSoldier.cpp" />
+    <ClCompile Include="HeavyTank.cpp" />
+    <ClCompile Include="IUnit.cpp" />
+    <ClCompile Include="LightTank.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="PathRequest.cpp" />
+    <ClCompile Include="Scout.cpp" />
     <ClCompile Include="src\cpp\GameObject.cpp" />
     <ClCompile Include="src\cpp\GhostGameObject.cpp" />
     <ClCompile Include="src\cpp\Map.cpp" />
     <ClCompile Include="src\cpp\Scene.cpp" />
     <ClCompile Include="src\cpp\SelectionManager.cpp" />
+    <ClCompile Include="Troop.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Dependencies\IMGUI\imconfig.h" />
@@ -173,10 +184,20 @@
     <ClInclude Include="..\Dependencies\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="..\Dependencies\IMGUI\imstb_textedit.h" />
     <ClInclude Include="..\Dependencies\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="AttackRequest.h" />
+    <ClInclude Include="Barracks.h" />
+    <ClInclude Include="Building.h" />
+    <ClInclude Include="BuildRequest.h" />
+    <ClInclude Include="Collection.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="FootSoldier.h" />
+    <ClInclude Include="HeavyTank.h" />
+    <ClInclude Include="LightTank.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="PathRequest.h" />
+    <ClInclude Include="Scout.h" />
     <ClInclude Include="src\Headers\Camera.h" />
     <ClInclude Include="src\Headers\GameObject.h" />
     <ClInclude Include="src\Headers\ghostGameObject.h" />
@@ -184,6 +205,8 @@
     <ClInclude Include="src\Headers\Scene.h" />
     <ClInclude Include="src\Headers\SelectionManager.h" />
     <ClInclude Include="src\Headers\Shader.h" />
+    <ClInclude Include="IUnit.h" />
+    <ClInclude Include="Troop.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

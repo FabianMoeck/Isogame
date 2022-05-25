@@ -5,6 +5,8 @@
 #include "glm/glm.hpp"
 #include "src/Headers/GameObject.h"
 #include "Pathfinding.h"
+#include "Troop.h"
+#include "AttackRequest.h"
 
 class PathRequest
 {
@@ -12,11 +14,14 @@ public:
 	std::list<glm::vec3*> path;
 	GameObject* moveGO;
 	glm::vec3 targetPos;
+	GameObject* targetObject = nullptr;
 	float dist = 0;
 	bool moving;
 	int current;
+	std::list<AttackRequest*>* atkList;
 
-	PathRequest(GameObject* _move, glm::vec3 _targetPos, Pathfinding _finder);
+	PathRequest(GameObject* _move, glm::vec3 _targetPos, Pathfinding _finder, std::list<AttackRequest*>* _atkList);
+	PathRequest(GameObject* _move, GameObject* _targetObject, Pathfinding _finder, std::list<AttackRequest*>* _atkList);
 	~PathRequest();
 
 	void move(float _deltaTime);
@@ -30,6 +35,7 @@ public:
 	}
 
 private:
+	glm::vec3 findPosition(GameObject* _move, GameObject* _target);
 };
 
 constexpr bool operator==(const PathRequest& n1, const PathRequest& n2)

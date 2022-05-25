@@ -5,32 +5,53 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
+#include <list>
+
+#include "../../Collection.h"
+#include <queue>
 
 class GameObject
 {
 public:
-	std::string name;
 	bool selectable;
 	bool selected = false;
 	glm::vec3 position;
 	glm::vec3 scale;
 	float angle;
 	glm::vec3 color;
+    IUnit* u = nullptr;
+
+    bool calculating = false;
+    std::queue<GameObject*> buildingQueue;
+    GameObject* current = nullptr;
 
     enum class GameObjectType
     {
-        Unit_1,
-        Unit_2,
-        Building
+        FootSoldier,
+        Scout,
+        LightTank,
+        HeavyTank,
+        MainBuilding,
+        Barracks,
+        Factory
     };
     GameObjectType type;
     static const char* type_tostring(int type) {
-        const char* types[] = { "Unit_1", "Unit_2", "Building" };
+        const char* types[] = { "FootSoldier", "Scout", "LightTank", "HeavyTank", "MainBuilding", "Barracks", "Factory"};
         return types[type];
     };
+    
+    enum Team
+    {
+        Neutral,
+        Player,
+        Ally,
+        Enemy
+    };
+    Team team;
 
 	GameObject();
-	GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable, GameObjectType _type);
+	GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable, GameObjectType _type, Team _team);
 	~GameObject();
     friend bool operator==(const GameObject first, const GameObject second);
     friend bool operator!=(const GameObject first, const GameObject second);
@@ -40,6 +61,16 @@ public:
     unsigned int* Indices();
     int sizeOfVertices();
     int sizeOfIndices();
+
+    static void removeObject(std::list<GameObject*> *s, IUnit* remove) {
+        for (GameObject* g : *s) {
+            if (g->u == remove) {
+                s->remove(g);
+                g->~GameObject();
+                break;
+            }
+        }
+    };
 
 private:
 	float cubeVertices[108] = {
@@ -89,6 +120,8 @@ private:
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
+
+    void initType(std::string _name, Team _team);
 };
 
 inline float* GameObject::CubeVertices()

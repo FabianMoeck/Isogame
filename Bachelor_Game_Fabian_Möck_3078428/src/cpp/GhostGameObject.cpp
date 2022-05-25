@@ -5,7 +5,7 @@ GhostGO::GhostGO() {
 	tmp_position = glm::vec3(0.0f, -10.0f, 0.0f);
 }
 
-GhostGO::GhostGO(std::string _name, glm::vec3 _scale, glm::vec3 _color, bool _selectable, GameObject::GameObjectType _type)
+GhostGO::GhostGO(std::string _name, glm::vec3 _scale, glm::vec3 _color, bool _selectable, GameObject::GameObjectType _type, GameObject::Team _team)
 {
 	name = _name;
 	scale = _scale;
@@ -13,6 +13,7 @@ GhostGO::GhostGO(std::string _name, glm::vec3 _scale, glm::vec3 _color, bool _se
 	selectable = _selectable;
 	type = _type;
 	angle = 0.0f;
+	team = _team;
 }
 
 GhostGO::~GhostGO()
@@ -20,7 +21,7 @@ GhostGO::~GhostGO()
 }
 
 GameObject* GhostGO::placeGhost() {
-	GameObject* newGO = new GameObject(name, tmp_position, scale, angle, color, selectable, type);
+	GameObject* newGO = new GameObject(name, tmp_position, scale, angle, color, selectable, type, team);
 	return newGO;
 }
 

@@ -17,9 +17,10 @@ public:
 	GameObject::GameObjectType type;
 	float angle;
 	glm::vec3 tmp_position;
+	GameObject::Team team;
 
 	GhostGO();
-	GhostGO(std::string _name, glm::vec3 _scale, glm::vec3 _color, bool _selectable, GameObject::GameObjectType _type);
+	GhostGO(std::string _name, glm::vec3 _scale, glm::vec3 _color, bool _selectable, GameObject::GameObjectType _type, GameObject::Team _team);
 	~GhostGO();
 
 	GameObject* placeGhost();

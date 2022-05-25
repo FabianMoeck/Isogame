@@ -66,14 +66,11 @@ std::list<glm::vec3*> Pathfinding::retracePath(Node* startNode, Node* targetNode
 	std::list<Node*> path;
 	Node* currentNode = targetNode;                     //start from end and move back thorugh the parents
 
-	std::cout << "CompletePath: " << '\n';
 	while (*currentNode != *startNode)
 	{
-		std::cout << currentNode->position.x << "/" << currentNode->position.z << '\n';
 		path.push_back(currentNode);
 		currentNode = currentNode->parent;
 	}
-	std::cout << '\n';
 
 	std::list<glm::vec3*> waypoints = simplifiePath(&path);          //only add nodes where the dircetion changes
 	waypoints.reverse();
@@ -85,21 +82,16 @@ std::list<glm::vec3*> Pathfinding::simplifiePath(std::list<Node*> *path) {
 	std::list<glm::vec3*> waypoints;
 	glm::vec2 directionOld = glm::vec2(0.0f);
 
-	std::cout << "Waypoints (simplified Path): " << '\n';
 	for (int i = 1; i < path->size(); i++)
 	{
 		glm::vec2 directionNew = glm::vec2(get(*path, i - 1)->gridX - get(*path, i)->gridX, get(*path, i - 1)->gridY - get(*path, i)->gridY);       //calc the direction of the vector between 2 nodes in the path
 
-		std::cout << "Direction: " << i - 1 << " - " << i << " : Old:" << directionOld.x << "/" << directionOld.y << " -- New: " << directionNew.x << "/" << directionNew.y << '\n';
-
 		if (directionNew != directionOld)
 		{
-			std::cout << get(*path, i-1)->position.x << "/" << get(*path, i)->position.z << '\n';
 			waypoints.push_back(&get(*path, i -1)->position);                //add this node to the simpliefied list
 		}
 		directionOld = directionNew;                        //update the old direction
 	}
-	std::cout << '\n';
 
 	return waypoints;
 }
