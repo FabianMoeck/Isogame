@@ -20,7 +20,7 @@ void BuildRequest::build(Scene* scene, float* deltaTime) {
 		parent->calculating = true;
 	}
 	else {
-		if (parent->current != nullptr && parent->current != data) {
+		if (parent->current != nullptr && parent->current == data) {
 			if (timeBuilding >= parent->current->u->buildTime) {
 				IUnit* b = (IUnit*)parent->current->u;
 				b->onInit();

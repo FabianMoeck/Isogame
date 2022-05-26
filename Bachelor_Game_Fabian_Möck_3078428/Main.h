@@ -46,3 +46,12 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map);
 
 //color
 glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
+
+glm::vec3* get(std::list<glm::vec3*> *_list, int _index) {
+	std::list<glm::vec3*>::const_iterator it = _list->begin();
+	for (unsigned int i = 0; i < _index; i++)
+	{
+		it++;
+	}
+	return *it;
+}

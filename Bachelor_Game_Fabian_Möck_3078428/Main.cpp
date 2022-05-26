@@ -18,6 +18,9 @@ GameObject* barrack;
 bool factoryBuild = false;
 GameObject* factory;
 
+void drawLine(PathRequest* pr);
+void drawLine(AttackRequest* ar);
+
 //DEBUG
 bool debugDrawCubes = true;
 
@@ -188,6 +191,8 @@ int main()
 
         projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
+        
+
         //render Objects
         scene_1.active = true;              //set scene as active
         if (scene_1.active) {
@@ -340,6 +345,7 @@ int main()
         if (moveRequest.size() > 0) {                           //move Units
             for (PathRequest* pr : moveRequest) {
                 if (pr->moving) {
+                    drawLine(pr);
                     pr->move(deltaTime);
                     if (!pr->moving) {
                         moveRequest.remove(pr);
@@ -352,6 +358,7 @@ int main()
 
         if (attackList.size() > 0) {                    //attack Units
             for (AttackRequest* atk : attackList) {
+                drawLine(atk);
                 if (atk->attack(deltaTime))
                     continue;
                 else {
@@ -1054,6 +1061,106 @@ void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map) {
         glm::vec3 pos = glm::vec3(map->grid[picked_X][picked_Y]->position.x, map->grid[picked_X][picked_Y]->position.y + (ghost->scale.y), map->grid[picked_X][picked_Y]->position.z);
         ghost->tmp_position = pos;
     }
+}
+
+void drawLine(PathRequest* pr) {
+    unsigned int LINE_VAO;
+    for (unsigned int i = 0; i < pr->path.size(); i++)
+    {
+        unsigned int VBO;
+        glGenVertexArrays(1, &LINE_VAO);
+        glGenBuffers(1, &VBO);
+
+        glBindVertexArray(LINE_VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+        glLineWidth(3);
+        glm::vec3* c = get(&pr->path, i);
+        if (pr->current < 1 && i == 0) {                                //problem second waypoint doesnt get connected immidiatly
+            float lineVertices[] = {
+            pr->moveGO->position.x, pr->moveGO->position.y, pr->moveGO->position.z,
+            c->x, pr->moveGO->position.y, c->z,
+            };
+            glBufferData(GL_ARRAY_BUFFER, sizeof(lineVertices), lineVertices, GL_STATIC_DRAW);
+        }
+        else {
+            if (i < pr->path.size() - 1 && pr->current == 0) {
+                glm::vec3* n = get(&pr->path, i+1);
+                float lineVertices[] = {
+                n->x, pr->moveGO->position.y, n->z,
+                c->x, pr->moveGO->position.y, c->z,
+                };
+                glBufferData(GL_ARRAY_BUFFER, sizeof(lineVertices), lineVertices, GL_STATIC_DRAW);
+            }
+        }
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+        glDeleteBuffers(1, &VBO);
+
+        glBindVertexArray(LINE_VAO);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3());
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 1, 0));
+        model = glm::scale(model, glm::vec3(1.0f));
+
+        int modelloc = glGetUniformLocation(shaderID, "model");
+        glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+        int vertexcolor = glGetUniformLocation(shaderID, "color");
+        glUniform3f(vertexcolor, 1, 1, 1);
+
+        glDrawArrays(GL_LINES, 0, 2);
+    }
+}
+
+void drawLine(AttackRequest* ar) {
+    unsigned int LINE_VAO;
+    unsigned int VBO;
+    glGenVertexArrays(1, &LINE_VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(LINE_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glLineWidth(3);
+
+    GameObject* atk = GameObject::getGameObjectFromUnit(&scene_1.SceneList, ar->atk);
+    GameObject* def = GameObject::getGameObjectFromUnit(&scene_1.SceneList, ar->def);
+
+    float lineVertices[] = {
+    atk->position.x, atk->position.y, atk->position.z,
+    def->position.x, def->position.y, def->position.z
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lineVertices), lineVertices, GL_STATIC_DRAW);
+
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteBuffers(1, &VBO);
+
+    glBindVertexArray(LINE_VAO);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3());
+    model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 1, 0));
+    model = glm::scale(model, glm::vec3(1.0f));
+
+    int modelloc = glGetUniformLocation(shaderID, "model");
+    glUniformMatrix4fv(modelloc, 1, GL_FALSE, glm::value_ptr(model));
+
+    int vertexcolor = glGetUniformLocation(shaderID, "color");
+    glUniform3f(vertexcolor, 0.96f, 0.74f, 0.21f);
+
+    glDrawArrays(GL_LINES, 0, 2);
+    
 }
 #pragma endregion
 

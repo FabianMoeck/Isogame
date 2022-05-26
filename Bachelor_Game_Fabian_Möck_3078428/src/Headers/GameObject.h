@@ -72,6 +72,14 @@ public:
         }
     };
 
+    static GameObject* getGameObjectFromUnit(std::list<GameObject*>* s, IUnit* retrieve) {
+        for (GameObject* g : *s) {
+            if (g->u == retrieve) {
+                return g;
+            }
+        }
+    };
+
 private:
 	float cubeVertices[108] = {
     -0.5f, -0.5f, -0.5f,
