@@ -8,20 +8,6 @@
 #define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 //work in Porgress
-#include "AttackRequest.h"
-std::list<AttackRequest*> attackList;
-
-#include "BuildRequest.h"
-std::list<BuildRequest*> buildRequests;
-bool barracksBuild = false;
-GameObject* barrack;
-bool factoryBuild = false;
-GameObject* factory;
-
-bool enemyMain = true;
-
-void drawLine(PathRequest* pr);
-void drawLine(AttackRequest* ar);
 
 //DEBUG
 bool debugDrawCubes = true;
@@ -45,6 +31,15 @@ Map map;
 //Building / placing new Objects
 bool placeGhost = false;
 GhostGO ghostBuilding;
+
+std::list<AttackRequest*> attackList;
+std::list<BuildRequest*> buildRequests;
+bool barracksBuild = false;
+GameObject* barrack;
+bool factoryBuild = false;
+GameObject* factory;
+
+bool enemyMain = true;
 
 //Pathfinding
 std::list<PathRequest*> moveRequest;
@@ -125,11 +120,11 @@ int main()
 #pragma region Scene/GameObjects
     //init Scene and GO's
     scene_1 = Scene();
-    GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
+    GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
     GameObject cube2 = GameObject("Enemy_Barracks", glm::vec3(4.0f, 0.0f, 4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
-    GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 0.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Ally);
-    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
-    GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGB(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
+    GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 0.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(200, 78, 0), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Ally);
+    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
+    GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
 
     scene_1.SceneList.push_back(&cube1);
     scene_1.SceneList.push_back(&cube2);
@@ -138,10 +133,10 @@ int main()
     scene_1.SceneList.push_back(&cube5);
 
     selManager = SelectionManager::getInstance();
-    selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
+    selManager->selectionColor = RGBConvert(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
 
     //Map
-    map = Map(MAPSIZE_X,MAPSIZE_Y, RGB(17.0f, 138.0f, 19.0f), GRID_MULTI);
+    map = Map(MAPSIZE_X,MAPSIZE_Y, RGBConvert(17.0f, 138.0f, 19.0f), GRID_MULTI);
     map.updateGrid(&scene_1.SceneList);
 
     //Pathfinding
@@ -174,7 +169,7 @@ int main()
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
         //rendering
-        glm::vec3 bgColor = RGB(68, 135, 201);
+        glm::vec3 bgColor = RGBConvert(68, 135, 201);
         glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -225,12 +220,12 @@ int main()
         if (ImGui::BeginTabBar("tabs")) {
             if (ImGui::BeginTabItem("Buildings")) {
                 if (ImGui::Button("Barracks", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    GhostGO gGO = GhostGO("New Barracks", glm::vec3(1.0f, 1.0f, 1.0f), RGB(0,0,100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
+                    GhostGO gGO = GhostGO("New Barracks", glm::vec3(1.0f, 1.0f, 1.0f), RGBConvert(0,0,100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
                     ghostBuilding = gGO;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Factory", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                    GhostGO gGO = GhostGO("New Factory", glm::vec3(2.0f, 1.0f, 2.0f), RGB(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
+                    GhostGO gGO = GhostGO("New Factory", glm::vec3(2.0f, 1.0f, 2.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
                     ghostBuilding = gGO;
                 }
                 ImGui::EndTabItem();
@@ -238,14 +233,14 @@ int main()
             if (ImGui::BeginTabItem("Units")) {
                 if (ImGui::Button("FootSoldier", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (barracksBuild){
-                        BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
+                        BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Scout", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (barracksBuild) {
-                        BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
+                        BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
@@ -253,14 +248,14 @@ int main()
                 ImGui::NewLine();
                 if (ImGui::Button("HeavyTank", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (factoryBuild) {
-                        BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
+                        BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("LightTank", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (factoryBuild) {
-                        BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGB(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
+                        BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
@@ -758,7 +753,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 #pragma endregion
 
 #pragma region Util
-glm::vec3 RGB(const float _R, const float _G, const float _B) {
+glm::vec3 RGBConvert(const float _R, const float _G, const float _B) {
     float r = _R / 255;
     float g = _G / 255;
     float b = _B / 255;

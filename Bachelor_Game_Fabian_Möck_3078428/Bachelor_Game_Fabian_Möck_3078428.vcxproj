@@ -189,10 +189,10 @@
     <ClInclude Include="Barracks.h" />
     <ClInclude Include="Building.h" />
     <ClInclude Include="BuildRequest.h" />
-    <ClInclude Include="Collection.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="FootSoldier.h" />
     <ClInclude Include="HeavyTank.h" />
+    <ClInclude Include="IUnit.h" />
     <ClInclude Include="LightTank.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="MainBuilding.h" />
@@ -207,8 +207,8 @@
     <ClInclude Include="src\Headers\Scene.h" />
     <ClInclude Include="src\Headers\SelectionManager.h" />
     <ClInclude Include="src\Headers\Shader.h" />
-    <ClInclude Include="IUnit.h" />
     <ClInclude Include="Troop.h" />
+    <ClInclude Include="Collection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -19,6 +19,9 @@
 #include "src/Headers/ghostGameObject.h"
 #include "Pathfinding.h"
 #include "PathRequest.h"
+#include "AttackRequest.h"
+#include "BuildRequest.h"
+
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
 
@@ -43,9 +46,11 @@ void drawPlane(const unsigned int shaderID, const Map *map);
 void drawPickingPlane(const unsigned int shaderID, const Map *map);
 void drawGhostObject(unsigned int shaderID, GhostGO* todraw);
 void ghostPosition(GLFWwindow* window, GhostGO* ghost, Map* map);
+void drawLine(PathRequest* pr);
+void drawLine(AttackRequest* ar);
 
 //color
-glm::vec3 RGB(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
+glm::vec3 RGBConvert(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
 
 glm::vec3* get(std::list<glm::vec3*> *_list, int _index) {
 	std::list<glm::vec3*>::const_iterator it = _list->begin();

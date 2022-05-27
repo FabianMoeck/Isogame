@@ -57,11 +57,7 @@ Node*** Map::initGrid(const int sizeX, const int sizeY) {
         for (int j = 0; j < sizeY * gridMultiplier; j++)
         {
             float x = i, y = j;
-            /*if (i == 0 && j == 0) {
-                gridPosition[i][j] = new Node(glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier), true, i, j);
-            }
-            else*/
-                gridPosition[i][j] = new Node(glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier), true, i, j);
+            gridPosition[i][j] = new Node(glm::vec3(0.0f + x / gridMultiplier, -0.5f, 0.0f + y / gridMultiplier), true, i, j);
         }
     }
 
@@ -85,9 +81,11 @@ void Map::updateGrid(const std::list<GameObject*> *scene) {
         if (g->position.x >= 0.0f && g->position.z >= 0.0f) {
             Node* startNode = nodeFromMap(g->position);
             if (g->scale.x >= 1 && g->scale.z >= 1) {
-                for (int i = 0; i < g->scale.x * gridMultiplier; i++) {
-                    for (int j = 0; j < g->scale.z * gridMultiplier; j++) {
-                        Node* n = nodeFromMap(glm::vec3(startNode->position.x + ((1 / gridMultiplier) * i), 0.5f, startNode->position.z + ((1 / gridMultiplier) * j)));
+                for (int i = -(gridMultiplier * g->scale.x); i < gridMultiplier * g->scale.x; i++)
+                {
+                    for (int j = -(gridMultiplier * g->scale.z); j < gridMultiplier * g->scale.z; j++)
+                    {
+                        Node* n = nodeFromMap(glm::vec3(startNode->position.x + ((0.5f / gridMultiplier) * i), 0.5f, startNode->position.z + ((0.5f / gridMultiplier) * j)));
                         n->walkable = false;
                     }
                 }
