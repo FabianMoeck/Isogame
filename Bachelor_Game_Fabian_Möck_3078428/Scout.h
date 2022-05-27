@@ -6,7 +6,7 @@
 class Scout : public ITroop
 {
 public:
-	Scout(std::string _name, int _team);
+	Scout(std::string _name, int _team, int _type);
 	~Scout();
 
 private:

@@ -11,6 +11,7 @@ public:
 	std::string name = "";
 	float speed = 0.0f;
 	int team;
+	int type;
 
 	float buildTime = 0.0f;
 
@@ -22,7 +23,7 @@ public:
 	};
 	unitHealthState hpState;
 
-	IUnit(std::string _name, int _team);
+	IUnit(std::string _name, int _team, int _type);
 	void takeDamage(int _amount);
 
 	virtual void onInit() = 0;					//called when initiating the Unit

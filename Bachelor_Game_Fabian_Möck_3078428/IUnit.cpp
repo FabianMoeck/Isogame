@@ -1,10 +1,11 @@
 #include "IUnit.h"
 
-IUnit::IUnit(std::string _name, int _team)
+IUnit::IUnit(std::string _name, int _team, int _type)
 {
 	name = _name;
 	hpState = IUnit::unitHealthState::alive;
 	team = _team;
+	type = _type;
 }
 
 IUnit::~IUnit()

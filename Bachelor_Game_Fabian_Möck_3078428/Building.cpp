@@ -1,6 +1,6 @@
 #include "Building.h"
 
-Building::Building(std::string _name, int _team) : IUnit(_name, _team)
+Building::Building(std::string _name, int _team, int _type) : IUnit(_name, _team, _type)
 {
 }
 

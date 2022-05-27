@@ -14,7 +14,7 @@ public:
 	float aS = 1.2f;
 	float bT = 1.0f;
 
-	FootSoldier(std::string _name, int _team);
+	FootSoldier(std::string _name, int _team, int _type);
 	~FootSoldier();
 
 private:

@@ -10,7 +10,7 @@ public:
 	int damage = 0;
 	float attackSpeed = 0.0f;
 
-	ITroop(std::string _name, int _team);
+	ITroop(std::string _name, int _team, int _type);
 
 protected:
 	virtual ~ITroop();

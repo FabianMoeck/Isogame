@@ -6,7 +6,7 @@
 class HeavyTank : public ITroop
 {
 public:
-	HeavyTank(std::string _name, int _team);
+	HeavyTank(std::string _name, int _team, int _type);
 	~HeavyTank();
 
 private:

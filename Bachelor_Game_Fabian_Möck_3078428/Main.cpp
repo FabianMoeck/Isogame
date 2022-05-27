@@ -18,6 +18,8 @@ GameObject* barrack;
 bool factoryBuild = false;
 GameObject* factory;
 
+bool enemyMain = true;
+
 void drawLine(PathRequest* pr);
 void drawLine(AttackRequest* ar);
 
@@ -127,11 +129,13 @@ int main()
     GameObject cube2 = GameObject("Enemy_Barracks", glm::vec3(4.0f, 0.0f, 4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 0.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(200, 78, 0), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Ally);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGB(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
+    GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGB(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
 
     scene_1.SceneList.push_back(&cube1);
     scene_1.SceneList.push_back(&cube2);
     scene_1.SceneList.push_back(&cube3);
     scene_1.SceneList.push_back(&cube4);
+    scene_1.SceneList.push_back(&cube5);
 
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGB(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
@@ -195,7 +199,7 @@ int main()
 
         //render Objects
         scene_1.active = true;              //set scene as active
-        if (scene_1.active) {
+        if (scene_1.active && enemyMain) {
             for (GameObject* g : scene_1.SceneList)
             {
                 if(debugDrawCubes)
@@ -210,6 +214,7 @@ int main()
             drawPlane(shader.ID, &map);
         else
             drawPickingPlane(shaderID, &map);          //debug
+
 
 #pragma region UI content
         //ImGui UIRight
@@ -359,9 +364,24 @@ int main()
         if (attackList.size() > 0) {                    //attack Units
             for (AttackRequest* atk : attackList) {
                 drawLine(atk);
-                if (atk->attack(deltaTime))
+                int r = atk->attack(deltaTime);                 // 1 = target didnt die or not attacked (time), 0 = any unit was destroyed, 2 = Enemy main Building destroyed, 3 = Player Main destroyed
+                if (r == 1)
                     continue;
-                else {
+                else if(r == 0) {
+                    GameObject::removeObject(&scene_1.SceneList, atk->def);
+                    attackList.remove(atk);
+                    map.updateGrid(&scene_1.SceneList);
+                    break;
+                }
+                else if (r == 2) {
+                    std::cout << "Enemy Main Building Destroyed\nYou Win" << std::endl;
+                    GameObject::removeObject(&scene_1.SceneList, atk->def);
+                    attackList.remove(atk);
+                    map.updateGrid(&scene_1.SceneList);
+                    break;
+                }
+                else if (r == 3) {
+                    std::cout << "Player Main Building Destroyed\nYou Loose" << std::endl;
                     GameObject::removeObject(&scene_1.SceneList, atk->def);
                     attackList.remove(atk);
                     map.updateGrid(&scene_1.SceneList);
@@ -1077,7 +1097,7 @@ void drawLine(PathRequest* pr) {
 
         glLineWidth(3);
         glm::vec3* c = get(&pr->path, i);
-        if (pr->current < 1 && i == 0) {                                //problem second waypoint doesnt get connected immidiatly
+        if (pr->current == 0 && i == 0) {                                //problem second waypoint doesnt get connected immidiatly
             float lineVertices[] = {
             pr->moveGO->position.x, pr->moveGO->position.y, pr->moveGO->position.z,
             c->x, pr->moveGO->position.y, c->z,
@@ -1085,7 +1105,7 @@ void drawLine(PathRequest* pr) {
             glBufferData(GL_ARRAY_BUFFER, sizeof(lineVertices), lineVertices, GL_STATIC_DRAW);
         }
         else {
-            if (i < pr->path.size() - 1 && pr->current == 0) {
+            if (i < pr->path.size() - 1 && pr->current > 0) {
                 glm::vec3* n = get(&pr->path, i+1);
                 float lineVertices[] = {
                 n->x, pr->moveGO->position.y, n->z,

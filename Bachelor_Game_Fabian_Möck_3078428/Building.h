@@ -6,7 +6,7 @@
 class Building : public IUnit
 {
 public:
-	Building(std::string _name, int _team);
+	Building(std::string _name, int _team, int _type);
 
 protected:
 	virtual ~Building();

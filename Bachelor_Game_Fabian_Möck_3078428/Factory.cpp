@@ -1,6 +1,6 @@
 #include "Factory.h"
 
-Factory::Factory(std::string _name, int _team) : Building(_name, _team)
+Factory::Factory(std::string _name, int _team, int _type) : Building(_name, _team, _type)
 {
 	health = hp;
 	buildTime = bT;

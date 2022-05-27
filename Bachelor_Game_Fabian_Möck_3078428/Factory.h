@@ -6,7 +6,7 @@
 class Factory : public Building
 {
 public:
-	Factory(std::string _name, int _team);
+	Factory(std::string _name, int _team, int _type);
 	~Factory();
 
 private:

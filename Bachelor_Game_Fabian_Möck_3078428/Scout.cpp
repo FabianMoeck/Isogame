@@ -1,6 +1,6 @@
 #include "Scout.h"
 
-Scout::Scout(std::string _name, int _team) : ITroop(_name, _team)
+Scout::Scout(std::string _name, int _team, int _type) : ITroop(_name, _team, _type)
 {
 	health = hp;
 	speed = mS;

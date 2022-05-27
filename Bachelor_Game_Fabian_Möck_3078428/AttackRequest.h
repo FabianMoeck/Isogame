@@ -13,7 +13,7 @@ public:
 	AttackRequest(ITroop *attacker, IUnit* target);
 	~AttackRequest();
 
-	bool attack(float _deltaTime);
+	int attack(float _deltaTime);
 
 private:
 

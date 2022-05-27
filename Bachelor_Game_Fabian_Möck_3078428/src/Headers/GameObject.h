@@ -129,7 +129,7 @@ private:
         1, 2, 3  // second triangle
     };
 
-    void initType(std::string _name, Team _team);
+    void initType(std::string _name, Team _team, int _type);
 };
 
 inline float* GameObject::CubeVertices()

@@ -147,6 +147,9 @@
     <ClCompile Include="Factory.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
+    <ClCompile Include="MainBuilding.cpp">
+      <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Headers\Shader.h">
@@ -243,6 +246,9 @@
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
     <ClInclude Include="Factory.h">
+      <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="MainBuilding.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
   </ItemGroup>

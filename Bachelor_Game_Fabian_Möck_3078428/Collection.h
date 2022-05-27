@@ -2,6 +2,7 @@
 #define UNITCOLLECTION_H
 
 //Buildings
+#include "MainBuilding.h"
 #include "Barracks.h"
 #include "Factory.h"
 

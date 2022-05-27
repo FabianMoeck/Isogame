@@ -23,7 +23,7 @@ GameObject::GameObject() {
     type = GameObjectType::FootSoldier;
     team = Team::Neutral;
 
-    initType("New Unit", Team::Neutral);
+    initType("New Unit", Team::Neutral, static_cast<int>(type));
 }
 
 GameObject::GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale, float _angle, glm::vec3 _color, bool _selectable, GameObjectType _type, Team _team)
@@ -36,32 +36,32 @@ GameObject::GameObject(std::string _name, glm::vec3 _position, glm::vec3 _scale,
     type = _type;
     team = _team;
 
-    initType(_name, _team);
+    initType(_name, _team, static_cast<int>(_type));
 }
 
 GameObject::~GameObject()
 {
 }
 
-void GameObject::initType(std::string _name, Team _team) {
+void GameObject::initType(std::string _name, Team _team, int _type) {
     switch (type) {
         //Units
     case GameObjectType::FootSoldier:
-        u = new FootSoldier(_name, _team); break;
+        u = new FootSoldier(_name, _team, _type); break;
     case GameObjectType::Scout:
-        u = new Scout(_name, _team); break;
+        u = new Scout(_name, _team, _type); break;
     case GameObjectType::HeavyTank:
-        u = new HeavyTank(_name, _team); break;
+        u = new HeavyTank(_name, _team, _type); break;
     case GameObjectType::LightTank:
-        u = new LightTank(_name, _team); break;
+        u = new LightTank(_name, _team, _type); break;
 
         //Buildings
     case GameObjectType::MainBuilding:
-        break;
+        u = new MainBuilding(_name, _team, _type); break;
     case GameObjectType::Barracks:
-        u = new Barracks(_name, _team); break;
+        u = new Barracks(_name, _team, _type); break;
     case GameObjectType::Factory:
-        u = new Factory(_name, _team); break;
+        u = new Factory(_name, _team, _type); break;
     default:
         break;
     }

@@ -87,7 +87,7 @@ void Map::updateGrid(const std::list<GameObject*> *scene) {
             if (g->scale.x >= 1 && g->scale.z >= 1) {
                 for (int i = 0; i < g->scale.x * gridMultiplier; i++) {
                     for (int j = 0; j < g->scale.z * gridMultiplier; j++) {
-                        Node* n = nodeFromMap(glm::vec3(startNode->position.x + ((0.5f / gridMultiplier) * i), 0.5f, startNode->position.z + ((0.5f / gridMultiplier) * j)));
+                        Node* n = nodeFromMap(glm::vec3(startNode->position.x + ((1 / gridMultiplier) * i), 0.5f, startNode->position.z + ((1 / gridMultiplier) * j)));
                         n->walkable = false;
                     }
                 }

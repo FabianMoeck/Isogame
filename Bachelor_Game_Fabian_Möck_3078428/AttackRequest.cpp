@@ -10,13 +10,23 @@ AttackRequest::~AttackRequest()
 {
 }
 
-bool AttackRequest::attack(float _deltaTime) {
+int AttackRequest::attack(float _deltaTime) {
 	if (timeSinceLastAttack > atk->attackSpeed) {
 		def->takeDamage(atk->damage);
 		def->onHit();
 		if (def->hpState == IUnit::unitHealthState::dead) {
-			def->onDeath();
-			return false;
+			if (def->team == 3 && def->type == 4) {
+				def->onDeath();
+				return 2;
+			}
+			else if (def->team == 1 && def->type == 4) {
+				def->onDeath();
+				return 3;
+			}
+			else {
+				def->onDeath();
+				return 0;
+			}
 		}
 			
 		timeSinceLastAttack = 0.0f;
@@ -24,5 +34,5 @@ bool AttackRequest::attack(float _deltaTime) {
 	else
 		timeSinceLastAttack += _deltaTime;
 
-	return true;
+	return 1;
 }
