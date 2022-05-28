@@ -16,6 +16,8 @@ private:
 	float r = 2.8f;
 	int d = 10;
 	float aS = 1.3f;
+	float bT = 1.2f;
+	float c = 100;
 
 	virtual void onDeath();
 	virtual void onInit();

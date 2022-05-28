@@ -4,6 +4,7 @@ Barracks::Barracks(std::string _name, int _team, int _type) : Building(_name, _t
 {
 	health = hp;
 	buildTime = bT;
+	cost = c;
 
 	onInit();
 }

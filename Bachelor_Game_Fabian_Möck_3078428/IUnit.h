@@ -10,6 +10,7 @@ public:
 	int health = 0;
 	std::string name = "";
 	float speed = 0.0f;
+	int cost = 0.0f;
 	int team;
 	int type;
 

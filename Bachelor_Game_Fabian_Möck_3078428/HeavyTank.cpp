@@ -9,6 +9,9 @@ HeavyTank::HeavyTank(std::string _name, int _team, int _type) : ITroop(_name, _t
 	damage = d;
 	range = r;
 	buildTime = bT;
+	cost = c;
+
+	onInit();
 }
 
 HeavyTank::~HeavyTank()

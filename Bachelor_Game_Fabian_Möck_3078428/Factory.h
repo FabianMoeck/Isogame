@@ -10,8 +10,9 @@ public:
 	~Factory();
 
 private:
-	int hp = 150;
+	int hp = 200;
 	float bT = 7.0f;
+	int c = 500;
 
 	void onInit();
 	void onHit();

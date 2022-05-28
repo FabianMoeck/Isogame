@@ -9,6 +9,9 @@ FootSoldier::FootSoldier(std::string _name, int _team, int _type) : ITroop(_name
 	damage = d;
 	range = r;
 	buildTime = bT;
+	cost = c;
+
+	onInit();
 }
 
 FootSoldier::~FootSoldier()

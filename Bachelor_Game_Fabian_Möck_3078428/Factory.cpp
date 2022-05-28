@@ -4,6 +4,7 @@ Factory::Factory(std::string _name, int _team, int _type) : Building(_name, _tea
 {
 	health = hp;
 	buildTime = bT;
+	cost = c;
 
 	onInit();
 }

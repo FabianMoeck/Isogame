@@ -8,6 +8,12 @@
 #define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 //work in Porgress
+int currentMoney = 0;
+float timeTillNewMoney = 1.5f;
+float timeSinceNewMoney = 1.5f;
+int addAmount = 20;
+void addMoney();
+bool reduceMoney(int _amount);
 
 //DEBUG
 bool debugDrawCubes = true;
@@ -217,28 +223,30 @@ int main()
         ImGui::SetWindowPos(ImVec2(UIright, 0.5f));
         ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
 
+        ImGui::Text("Money: %d", currentMoney);
+        ImGui::NewLine();
         if (ImGui::BeginTabBar("tabs")) {
             if (ImGui::BeginTabItem("Buildings")) {
-                if (ImGui::Button("Barracks", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                if (ImGui::Button("Barracks\nCost: 300", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     GhostGO gGO = GhostGO("New Barracks", glm::vec3(1.0f, 1.0f, 1.0f), RGBConvert(0,0,100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
                     ghostBuilding = gGO;
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Factory", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                if (ImGui::Button("Factory\nCost: 500", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
                     GhostGO gGO = GhostGO("New Factory", glm::vec3(2.0f, 1.0f, 2.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
                     ghostBuilding = gGO;
                 }
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Units")) {
-                if (ImGui::Button("FootSoldier", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                if (ImGui::Button("FootSoldier\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (barracksBuild){
                         BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Scout", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                if (ImGui::Button("Scout\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (barracksBuild) {
                         BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
                         buildRequests.push_back(b);
@@ -246,14 +254,14 @@ int main()
                 }
 
                 ImGui::NewLine();
-                if (ImGui::Button("HeavyTank", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                if (ImGui::Button("HeavyTank\nCost: 220", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (factoryBuild) {
                         BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
                         buildRequests.push_back(b);
                     }
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("LightTank", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                if (ImGui::Button("LightTank\nCost: 170", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                     if (factoryBuild) {
                         BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
                         buildRequests.push_back(b);
@@ -342,6 +350,13 @@ int main()
                 moveCamera(Direction::left);
         }
 
+        if (timeSinceNewMoney >= timeTillNewMoney) {
+            addMoney();
+            timeSinceNewMoney = 0.0f;
+        }
+        else
+            timeSinceNewMoney += deltaTime;
+
         if (moveRequest.size() > 0) {                           //move Units
             for (PathRequest* pr : moveRequest) {
                 if (pr->moving) {
@@ -388,9 +403,14 @@ int main()
         if (buildRequests.size() > 0) {                     //handle Build requests
             for (BuildRequest* br : buildRequests) {
                 if (!br->handled) {
-                    br->build(&scene_1, &deltaTime);
+                    if(currentMoney >= br->parent->u->cost)
+                        br->build(&scene_1, &deltaTime);
+                    else {
+                        std::cout << "Not enough money\n";
+                    }
                 }
                 else {
+                    reduceMoney(br->parent->u->cost);
                     map.updateGrid(&scene_1.SceneList);
                     buildRequests.remove(br);
                     break;
@@ -642,19 +662,23 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (ghostBuilding.name != "") {
             if (ghostBuilding.tmp_position.y != -10) {
                 GameObject* ghostToGo = ghostBuilding.placeGhost();
-                ghostBuilding = GhostGO();
-                placeGhost = false;
-                scene_1.SceneList.push_back(ghostToGo);
-                map.updateGrid(&scene_1.SceneList);
+                if (reduceMoney(ghostToGo->u->cost)) {
+                    ghostBuilding = GhostGO();
+                    placeGhost = false;
+                    scene_1.SceneList.push_back(ghostToGo);
+                    map.updateGrid(&scene_1.SceneList);
 
-                if (ghostToGo->type == GameObject::GameObjectType::Barracks) {
-                    barrack = ghostToGo;
-                    barracksBuild = true;
+                    if (ghostToGo->type == GameObject::GameObjectType::Barracks) {
+                        barrack = ghostToGo;
+                        barracksBuild = true;
+                    }
+                    else if (ghostToGo->type == GameObject::GameObjectType::Factory) {
+                        factory = ghostToGo;
+                        factoryBuild = true;
+                    }
                 }
-                else if (ghostToGo->type == GameObject::GameObjectType::Factory) {
-                    factory = ghostToGo;
-                    factoryBuild = true;
-                }
+                else
+                    delete(ghostToGo);
             }
         }
     }
@@ -665,6 +689,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+        if (ghostBuilding.name != "") {
+            placeGhost = false;
+            ghostBuilding = GhostGO();
+        }
+
         if (selManager->selection.size() > 0) {
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1191,6 +1220,22 @@ void moveCamera(Direction direction) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (direction == Direction::right && cameraPos.z > 7.5f)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void addMoney() {
+    currentMoney += addAmount;
+    std::cout << "New Amount: " << currentMoney << '\n';
+}
+
+bool reduceMoney(int _amount) {
+    if (currentMoney - _amount >= 0) {
+        currentMoney -= _amount;
+        return true;
+    }
+    else {
+        std::cout << "nout enough money\n";
+        return false;
+    }
 }
 
 #pragma endregion

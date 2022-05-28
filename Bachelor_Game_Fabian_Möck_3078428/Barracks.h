@@ -10,8 +10,9 @@ public:
 	~Barracks();
 
 private:
-	int hp = 30;
+	int hp = 180;
 	float bT = 5.5f;
+	int c = 300;
 
 	void onInit();
 	void onHit();

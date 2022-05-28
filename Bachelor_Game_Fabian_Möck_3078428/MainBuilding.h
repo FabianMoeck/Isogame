@@ -10,7 +10,7 @@ public:
 	~MainBuilding();
 
 private:
-	int hp = 200;
+	int hp = 350;
 
 	void onInit();
 	void onHit();

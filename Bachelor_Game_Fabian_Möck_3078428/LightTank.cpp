@@ -9,6 +9,9 @@ LightTank::LightTank(std::string _name, int _team, int _type) : ITroop(_name,_te
 	damage = d;
 	range = r;
 	buildTime = bT;
+	cost = c;
+
+	onInit();
 }
 
 LightTank::~LightTank()

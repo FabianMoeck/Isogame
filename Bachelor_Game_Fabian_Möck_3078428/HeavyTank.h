@@ -15,7 +15,8 @@ private:
 	float r = 2.0f;
 	int d = 40;
 	float aS = 2.3f;
-	float bT = 1.0f;
+	float bT = 2.8f;
+	int c = 220;
 
 	void onInit();
 	void onHit();

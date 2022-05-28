@@ -8,6 +8,10 @@ Scout::Scout(std::string _name, int _team, int _type) : ITroop(_name, _team, _ty
 	attackSpeed = aS;
 	damage = d;
 	range = r;
+	buildTime = bT;
+	cost = c;
+
+	onInit();
 }
 
 Scout::~Scout()

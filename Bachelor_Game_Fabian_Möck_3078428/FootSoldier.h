@@ -13,6 +13,7 @@ public:
 	int d = 15;
 	float aS = 1.2f;
 	float bT = 1.0f;
+	int c = 100;
 
 	FootSoldier(std::string _name, int _team, int _type);
 	~FootSoldier();
