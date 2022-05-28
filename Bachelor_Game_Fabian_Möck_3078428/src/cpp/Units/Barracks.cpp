@@ -1,4 +1,4 @@
-#include "Barracks.h"
+#include "../../Headers/Units/Barracks.h"
 
 Barracks::Barracks(std::string _name, int _team, int _type) : Building(_name, _team, _type)
 {

@@ -2,7 +2,7 @@
 #define PATHFINDING_H
 
 #include <glm/glm.hpp>
-#include "src/Headers/Map.h"
+#include "../../Headers/Map.h"
 #include <unordered_set>
 #include <iostream>
 

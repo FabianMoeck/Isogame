@@ -1,8 +1,8 @@
 #ifndef BUILDREQUEST_H
 #define BUILDREQUEST_H
 
-#include "src/Headers/GameObject.h"
-#include "src/Headers/Scene.h"
+#include "../GameObject.h"
+#include "../Scene.h"
 
 class BuildRequest
 {

@@ -3,10 +3,10 @@
 
 #include <list>
 #include "glm/glm.hpp"
-#include "src/Headers/GameObject.h"
+#include "../GameObject.h"
 #include "Pathfinding.h"
-#include "Troop.h"
-#include "AttackRequest.h"
+#include "../Units/Troop.h"
+#include "../Requests/AttackRequest.h"
 
 class PathRequest
 {

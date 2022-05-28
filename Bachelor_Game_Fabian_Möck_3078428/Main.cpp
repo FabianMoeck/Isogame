@@ -8,12 +8,6 @@
 #define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 //work in Porgress
-int currentMoney = 0;
-float timeTillNewMoney = 1.5f;
-float timeSinceNewMoney = 1.5f;
-int addAmount = 20;
-void addMoney();
-bool reduceMoney(int _amount);
 
 //DEBUG
 bool debugDrawCubes = true;
@@ -54,6 +48,12 @@ Pathfinding pathFinding;
 //Selection
 SelectionManager* selManager;
 double xPress = 0, yPress = 0;
+
+//Money
+int currentMoney = 0;
+float timeTillNewMoney = 1.5f;
+float timeSinceNewMoney = 1.5f;
+int addAmount = 20;
 
 //camera
 float fov = 45.0f;

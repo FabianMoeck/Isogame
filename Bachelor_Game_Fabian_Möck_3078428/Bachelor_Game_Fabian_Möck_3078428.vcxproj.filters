@@ -105,49 +105,49 @@
     <ClCompile Include="src\cpp\GhostGameObject.cpp">
       <Filter>Source Files\GameObjects</Filter>
     </ClCompile>
-    <ClCompile Include="Node.cpp">
+    <ClCompile Include="src\cpp\Node.cpp">
       <Filter>Source Files\Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="Pathfinding.cpp">
+    <ClCompile Include="src\cpp\Pathfinding\Pathfinding.cpp">
       <Filter>Source Files\Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="PathRequest.cpp">
+    <ClCompile Include="src\cpp\Pathfinding\PathRequest.cpp">
       <Filter>Source Files\Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="AttackRequest.cpp">
+    <ClCompile Include="src\cpp\Requests\AttackRequest.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="BuildRequest.cpp">
+    <ClCompile Include="src\cpp\Requests\BuildRequest.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="Barracks.cpp">
+    <ClCompile Include="src\cpp\Units\Barracks.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="Building.cpp">
+    <ClCompile Include="src\cpp\Units\Building.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="Factory.cpp">
+    <ClCompile Include="src\cpp\Units\Factory.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="MainBuilding.cpp">
+    <ClCompile Include="src\cpp\Units\MainBuilding.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="FootSoldier.cpp">
+    <ClCompile Include="src\cpp\Units\FootSoldier.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Units</Filter>
     </ClCompile>
-    <ClCompile Include="HeavyTank.cpp">
+    <ClCompile Include="src\cpp\Units\HeavyTank.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Units</Filter>
     </ClCompile>
-    <ClCompile Include="LightTank.cpp">
+    <ClCompile Include="src\cpp\Units\LightTank.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Units</Filter>
     </ClCompile>
-    <ClCompile Include="Scout.cpp">
+    <ClCompile Include="src\cpp\Units\Scout.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Units</Filter>
     </ClCompile>
-    <ClCompile Include="Troop.cpp">
+    <ClCompile Include="src\cpp\Units\Troop.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Units</Filter>
     </ClCompile>
-    <ClCompile Include="IUnit.cpp">
+    <ClCompile Include="src\cpp\Units\IUnit.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,49 +203,49 @@
     <ClInclude Include="src\Headers\ghostGameObject.h">
       <Filter>Header Files\GameObjects</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="src\Headers\Node.h">
       <Filter>Header Files\Pathfinding</Filter>
     </ClInclude>
-    <ClInclude Include="Pathfinding.h">
+    <ClInclude Include="src\Headers\Pathfinding\Pathfinding.h">
       <Filter>Header Files\Pathfinding</Filter>
     </ClInclude>
-    <ClInclude Include="PathRequest.h">
+    <ClInclude Include="src\Headers\Pathfinding\PathRequest.h">
       <Filter>Header Files\Pathfinding</Filter>
     </ClInclude>
-    <ClInclude Include="AttackRequest.h">
+    <ClInclude Include="src\Headers\Requests\AttackRequest.h">
       <Filter>Header Files\GameObjects\Units/Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="BuildRequest.h">
+    <ClInclude Include="src\Headers\Requests\BuildRequest.h">
       <Filter>Header Files\GameObjects\Units/Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="Barracks.h">
+    <ClInclude Include="src\Headers\Units\Barracks.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="Building.h">
+    <ClInclude Include="src\Headers\Units\Building.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="Factory.h">
+    <ClInclude Include="src\Headers\Units\Factory.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="MainBuilding.h">
+    <ClInclude Include="src\Headers\Units\MainBuilding.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="FootSoldier.h">
+    <ClInclude Include="src\Headers\Units\FootSoldier.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Units</Filter>
     </ClInclude>
-    <ClInclude Include="HeavyTank.h">
+    <ClInclude Include="src\Headers\Units\HeavyTank.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Units</Filter>
     </ClInclude>
-    <ClInclude Include="LightTank.h">
+    <ClInclude Include="src\Headers\Units\LightTank.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Units</Filter>
     </ClInclude>
-    <ClInclude Include="Scout.h">
+    <ClInclude Include="src\Headers\Units\Scout.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Units</Filter>
     </ClInclude>
-    <ClInclude Include="Troop.h">
+    <ClInclude Include="src\Headers\Units\Troop.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Units</Filter>
     </ClInclude>
-    <ClInclude Include="IUnit.h">
+    <ClInclude Include="src\Headers\Units\IUnit.h">
       <Filter>Header Files\GameObjects\Units/Buildings</Filter>
     </ClInclude>
     <ClInclude Include="Collection.h">

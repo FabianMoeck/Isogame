@@ -1,4 +1,4 @@
-#include "FootSoldier.h"
+#include "../../Headers/Units/FootSoldier.h"
 
 FootSoldier::FootSoldier(std::string _name, int _team, int _type) : ITroop(_name, _team, _type)
 {

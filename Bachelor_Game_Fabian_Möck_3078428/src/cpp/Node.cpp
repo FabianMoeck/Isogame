@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "../Headers/Node.h"
 
 Node::Node(glm::vec3 _position, bool _walkable, int _gridX, int _gridY)
 {

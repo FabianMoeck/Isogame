@@ -1,4 +1,4 @@
-#include "Scout.h"
+#include "../../Headers/Units/Scout.h"
 
 Scout::Scout(std::string _name, int _team, int _type) : ITroop(_name, _team, _type)
 {

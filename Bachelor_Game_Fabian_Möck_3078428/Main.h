@@ -17,10 +17,10 @@
 #include "src/Headers/SelectionManager.h"
 #include "src/Headers/Map.h"
 #include "src/Headers/ghostGameObject.h"
-#include "Pathfinding.h"
-#include "PathRequest.h"
-#include "AttackRequest.h"
-#include "BuildRequest.h"
+#include "src/Headers/Pathfinding/Pathfinding.h"
+#include "src/Headers/Pathfinding/PathRequest.h"
+#include "src/Headers/Requests/AttackRequest.h"
+#include "src/Headers/Requests/BuildRequest.h"
 
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);
@@ -51,6 +51,9 @@ void drawLine(AttackRequest* ar);
 
 //color
 glm::vec3 RGBConvert(const float _R, const float _G, const float _B);                //convert any RGB value into a range from 0-1
+
+void addMoney();
+bool reduceMoney(int _amount);
 
 glm::vec3* get(std::list<glm::vec3*> *_list, int _index) {
 	std::list<glm::vec3*>::const_iterator it = _list->begin();

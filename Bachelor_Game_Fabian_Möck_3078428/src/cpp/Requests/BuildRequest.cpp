@@ -1,4 +1,4 @@
-#include "BuildRequest.h"
+#include "../../Headers/Requests/BuildRequest.h"
 
 BuildRequest::BuildRequest()
 {

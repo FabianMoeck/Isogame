@@ -1,4 +1,4 @@
-#include "AttackRequest.h"
+#include "../../Headers/Requests/AttackRequest.h"
 
 AttackRequest::AttackRequest(ITroop* attacker, IUnit* target)
 {

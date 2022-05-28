@@ -1,4 +1,4 @@
-#include "PathRequest.h"
+#include "../../Headers/Pathfinding/PathRequest.h"
 
 
 PathRequest::PathRequest(GameObject* _move, glm::vec3 _targetPos, Pathfinding _finder, std::list<AttackRequest*>* _atkList)

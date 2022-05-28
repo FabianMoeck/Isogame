@@ -7,7 +7,7 @@
 //Wip
 #include "GameObject.h"
 #include <list>
-#include "../../Node.h"
+#include "Node.h"
 
 class Map
 {

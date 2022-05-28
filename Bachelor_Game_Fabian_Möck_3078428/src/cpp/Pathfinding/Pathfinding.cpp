@@ -1,4 +1,4 @@
-#include "Pathfinding.h"
+#include "../../Headers/Pathfinding/Pathfinding.h"
 
 Pathfinding::Pathfinding(Map *_map)
 {

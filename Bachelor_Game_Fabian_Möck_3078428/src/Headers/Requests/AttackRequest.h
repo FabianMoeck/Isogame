@@ -1,8 +1,8 @@
 #ifndef ATTACKREQUEST_H
 #define ATTACKREQUEST_H
 
-#include "Troop.h"
-#include "Collection.h"
+#include "../Units/Troop.h"
+#include "../../../Collection.h"
 
 class AttackRequest
 {
