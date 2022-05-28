@@ -219,7 +219,7 @@ int main()
 
 #pragma region UI content
         //ImGui UIRight
-        ImGui::Begin("Rigth UI");
+        ImGui::Begin("Build UI");
         ImGui::SetWindowPos(ImVec2(UIright, 0.5f));
         ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
 
@@ -276,7 +276,7 @@ int main()
 
         //BottomUI
         if (selManager->selection.size() > 0) {
-            ImGui::Begin("BottomUI");
+            ImGui::Begin("Selection UI");
             ImGui::SetWindowPos(ImVec2(0, UIbottom));
             ImGui::SetWindowSize(ImVec2((screenWidth - (screenWidth * UIpercentageRight)), (screenHeight - UIbottom)));
 
@@ -350,7 +350,7 @@ int main()
                 moveCamera(Direction::left);
         }
 
-        if (timeSinceNewMoney >= timeTillNewMoney) {
+        if (timeSinceNewMoney >= timeTillNewMoney) {            //try to add money to account
             addMoney();
             timeSinceNewMoney = 0.0f;
         }
@@ -1224,7 +1224,6 @@ void moveCamera(Direction direction) {
 
 void addMoney() {
     currentMoney += addAmount;
-    std::cout << "New Amount: " << currentMoney << '\n';
 }
 
 bool reduceMoney(int _amount) {
