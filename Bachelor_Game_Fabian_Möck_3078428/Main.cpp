@@ -7,10 +7,12 @@
 #define MAPSIZE_Y 50
 #define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
-//work in Porgress
-
-//DEBUG
+#define DEBUG true
+#if DEBUG == true
 bool debugDrawCubes = true;
+#endif // DEBUG
+
+//work in Porgress
 
 #pragma region Variables
 //Screen
@@ -38,6 +40,9 @@ bool barracksBuild = false;
 GameObject* barrack;
 bool factoryBuild = false;
 GameObject* factory;
+
+float MainBuilding::range{ 6.5f };
+GameObject* mainBuilding;
 
 bool enemyMain = true;
 
@@ -131,12 +136,16 @@ int main()
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 0.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(200, 78, 0), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Ally);
     GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
     GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
+    GameObject cube6 = GameObject("Player_Main", glm::vec3(10.0f, 0.0f, 30.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(8, 153, 143), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
 
     scene_1.SceneList.push_back(&cube1);
     scene_1.SceneList.push_back(&cube2);
     scene_1.SceneList.push_back(&cube3);
     scene_1.SceneList.push_back(&cube4);
     scene_1.SceneList.push_back(&cube5);
+    scene_1.SceneList.push_back(&cube6);
+
+    mainBuilding = &cube6;
 
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGBConvert(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
@@ -152,6 +161,12 @@ int main()
     createCubeVAO();
     createPlaneVAO();
     createGridVAO();
+
+    //Debug
+#ifdef DEBUG
+    currentMoney = 2000;
+#endif // DEBUG
+
 #pragma endregion
 
 #pragma region ImGuI
@@ -203,18 +218,32 @@ int main()
         if (scene_1.active && enemyMain) {
             for (GameObject* g : scene_1.SceneList)
             {
-                if(debugDrawCubes)
+#if DEBUG == true
+                if (debugDrawCubes)
                     drawCube(shader.ID, g);
+#else
+                drawCube(shader.ID, g);
+#endif // DEBUG
+
+                
             }
             if (placeGhost) {
                 drawGhostObject(shaderID, &ghostBuilding);
             }
         }
 
-        if(debugDrawCubes)
+#if DEBUG == true
+        if (debugDrawCubes)
             drawPlane(shader.ID, &map);
         else
             drawPickingPlane(shaderID, &map);          //debug
+#else
+        drawPlane(shader.ID, &map);
+#endif // DEBUG
+
+
+
+        
 
 
 #pragma region UI content
@@ -542,9 +571,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 
     //DEBUG
+#if DEBUG == true
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         debugDrawCubes = !debugDrawCubes;
     }
+#endif // DEBUG
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {  
@@ -662,23 +693,26 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (ghostBuilding.name != "") {
             if (ghostBuilding.tmp_position.y != -10) {
                 GameObject* ghostToGo = ghostBuilding.placeGhost();
-                if (reduceMoney(ghostToGo->u->cost)) {
-                    ghostBuilding = GhostGO();
-                    placeGhost = false;
-                    scene_1.SceneList.push_back(ghostToGo);
-                    map.updateGrid(&scene_1.SceneList);
+                if (glm::distance(ghostToGo->position, mainBuilding->position) < MainBuilding::range) {
+                    if (reduceMoney(ghostToGo->u->cost)) {
+                        ghostBuilding = GhostGO();
+                        placeGhost = false;
+                        scene_1.SceneList.push_back(ghostToGo);
+                        map.updateGrid(&scene_1.SceneList);
+                        MainBuilding::extendRange();
 
-                    if (ghostToGo->type == GameObject::GameObjectType::Barracks) {
-                        barrack = ghostToGo;
-                        barracksBuild = true;
+                        if (ghostToGo->type == GameObject::GameObjectType::Barracks) {
+                            barrack = ghostToGo;
+                            barracksBuild = true;
+                        }
+                        else if (ghostToGo->type == GameObject::GameObjectType::Factory) {
+                            factory = ghostToGo;
+                            factoryBuild = true;
+                        }
                     }
-                    else if (ghostToGo->type == GameObject::GameObjectType::Factory) {
-                        factory = ghostToGo;
-                        factoryBuild = true;
-                    }
+                    else
+                        delete(ghostToGo);
                 }
-                else
-                    delete(ghostToGo);
             }
         }
     }

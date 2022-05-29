@@ -6,8 +6,14 @@
 class MainBuilding : public Building
 {
 public:
+	static float range;
+
 	MainBuilding(std::string _name, int _team, int type);
 	~MainBuilding();
+
+	static void extendRange() {
+		range += 1.0f;
+	}
 
 private:
 	int hp = 350;
