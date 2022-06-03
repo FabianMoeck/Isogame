@@ -41,8 +41,6 @@ private:
 	float clip(float n, float lower, float upper) {
 		return std::max(lower, std::min(n, upper));
 	}
-
-	/*void blockedGrid(const std::list<GameObject> sceneObjects); */
 };
 
 #endif // !MAP_H

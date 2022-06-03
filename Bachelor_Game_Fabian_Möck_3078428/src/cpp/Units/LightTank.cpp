@@ -19,7 +19,7 @@ LightTank::~LightTank()
 }
 
 void LightTank::onInit() {
-
+	std::cout << "New " << name << " LT produced" << '\n';
 }
 
 void LightTank::onHit() {

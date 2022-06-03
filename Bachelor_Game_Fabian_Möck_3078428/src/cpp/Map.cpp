@@ -80,7 +80,7 @@ void Map::updateGrid(const std::list<GameObject*> *scene) {
     for (GameObject* g : *scene) {
         if (g->position.x >= 0.0f && g->position.z >= 0.0f) {
             Node* startNode = nodeFromMap(g->position);
-            if (g->scale.x >= 1 && g->scale.z >= 1) {
+            if (g->scale.x > 0 && g->scale.z > 0) {
                 for (int i = -(gridMultiplier * g->scale.x); i < gridMultiplier * g->scale.x; i++)
                 {
                     for (int j = -(gridMultiplier * g->scale.z); j < gridMultiplier * g->scale.z; j++)

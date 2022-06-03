@@ -19,7 +19,7 @@ Scout::~Scout()
 }
 
 void Scout::onInit() {
-	std::cout << "New " << name << " produced" << '\n';
+	std::cout << "New " << name << " Scout produced" << '\n';
 }
 
 void Scout::onHit() {

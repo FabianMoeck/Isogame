@@ -17,6 +17,7 @@ void MainBuilding::onInit()
 
 void MainBuilding::onHit()
 {
+
 }
 
 void MainBuilding::onDeath()

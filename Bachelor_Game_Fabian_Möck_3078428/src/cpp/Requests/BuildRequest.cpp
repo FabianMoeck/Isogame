@@ -14,6 +14,10 @@ BuildRequest::~BuildRequest()
 {
 }
 
+GameObject* BuildRequest::getData() {
+	return data;
+}
+
 void BuildRequest::build(Scene* scene, float* deltaTime) {
 	if (!parent->calculating) {
 		parent->current = parent->buildingQueue.front();
@@ -23,7 +27,6 @@ void BuildRequest::build(Scene* scene, float* deltaTime) {
 		if (parent->current != nullptr && parent->current == data) {
 			if (timeBuilding >= parent->current->u->buildTime) {
 				IUnit* b = (IUnit*)parent->current->u;
-				b->onInit();
 
 				scene->SceneList.push_back(parent->current);
 				handled = true;

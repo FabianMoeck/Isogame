@@ -33,11 +33,12 @@ public:
         HeavyTank,
         MainBuilding,
         Barracks,
-        Factory
+        Factory,
+        Wall
     };
     GameObjectType type;
     static const char* type_tostring(int type) {
-        const char* types[] = { "FootSoldier", "Scout", "LightTank", "HeavyTank", "MainBuilding", "Barracks", "Factory"};
+        const char* types[] = { "FootSoldier", "Scout", "LightTank", "HeavyTank", "MainBuilding", "Barracks", "Factory", "Wall"};
         return types[type];
     };
     

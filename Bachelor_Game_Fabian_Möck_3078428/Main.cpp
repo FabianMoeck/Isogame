@@ -13,6 +13,8 @@ bool debugDrawCubes = true;
 #endif // DEBUG
 
 //work in Porgress
+#include "EnemyManager.h"
+EnemyManager enemyManager;
 
 #pragma region Variables
 //Screen
@@ -42,9 +44,9 @@ bool factoryBuild = false;
 GameObject* factory;
 
 float MainBuilding::range{ 6.5f };
-GameObject* mainBuilding;
+GameObject* playerMainBuilding;
 
-bool enemyMain = true;
+bool enemyMainAlive = true;
 
 //Pathfinding
 std::list<PathRequest*> moveRequest;
@@ -65,7 +67,12 @@ float fov = 45.0f;
 glm::mat4 view;
 glm::mat4 projection;
 
+#if DEBUG == true
 glm::vec3 cameraPos = glm::vec3(25.0f, 20.0f, 10.0f);
+#else
+glm::vec3 cameraPos = glm::vec3(50.0f, 20.0f, 39.0f);
+#endif
+
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -86,6 +93,8 @@ double UIpercentageRight = 0.25;
 double UIright = screenWidth - (screenWidth * UIpercentageRight);
 double UIpercentageBottom = 0.15;
 double UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
+
+bool notPaused = true;
 #pragma endregion
 
 int main()
@@ -131,10 +140,11 @@ int main()
 #pragma region Scene/GameObjects
     //init Scene and GO's
     scene_1 = Scene();
+#if DEBUG == true
     GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
     GameObject cube2 = GameObject("Enemy_Barracks", glm::vec3(4.0f, 0.0f, 4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
-    GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 0.0f, 2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(200, 78, 0), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Ally);
-    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
+    GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 1.0f, 2.0f), glm::vec3(0.5f, 1.0f, 0.5f), 0.0f, RGBConvert(200, 78, 0), false, GameObject::GameObjectType::Wall, GameObject::Team::Ally);
+    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), false, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
     GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
     GameObject cube6 = GameObject("Player_Main", glm::vec3(10.0f, 0.0f, 30.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(8, 153, 143), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
 
@@ -145,7 +155,74 @@ int main()
     scene_1.SceneList.push_back(&cube5);
     scene_1.SceneList.push_back(&cube6);
 
-    mainBuilding = &cube6;
+    playerMainBuilding = &cube6;
+
+    enemyManager = EnemyManager(&attackList, &buildRequests, &moveRequest, &cube5, &cube2, &scene_1, &pathFinding);
+#else
+    //Player Main Building
+    GameObject playerMain = GameObject("Player_Main", glm::vec3(38.0f, 0.5f, 41.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(247, 202, 22), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
+    scene_1.SceneList.push_back(&playerMain);
+    playerMainBuilding = &playerMain;
+
+    //Enemy Base
+    GameObject enemyMain = GameObject("Enemy_Main", glm::vec3(4.0f, 0.5f, 4.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(1,1,1), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
+    scene_1.SceneList.push_back(&enemyMain);
+
+#pragma region Wall
+    GameObject wallSec_1 = GameObject("WallSec1", glm::vec3(21.0f, 1.0f, 0.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_2 = GameObject("WallSec2", glm::vec3(21.0f, 1.0f, 2.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_3 = GameObject("WallSec3", glm::vec3(21.0f, 1.0f, 3.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_4 = GameObject("WallSec4", glm::vec3(21.0f, 1.0f, 5.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_5 = GameObject("WallSec5", glm::vec3(21.0f, 1.0f, 6.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_6 = GameObject("WallSec6", glm::vec3(21.0f, 1.0f, 8.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_7 = GameObject("WallSec7", glm::vec3(21.0f, 1.0f, 9.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_8 = GameObject("WallSec8", glm::vec3(21.0f, 1.0f, 14.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_9 = GameObject("WallSec9", glm::vec3(21.0f, 1.0f, 15.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+
+    GameObject wallSec_10 = GameObject("WallSec10", glm::vec3(0.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_11 = GameObject("WallSec11", glm::vec3(2.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_12 = GameObject("WallSec12", glm::vec3(3.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_13 = GameObject("WallSec13", glm::vec3(5.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_14 = GameObject("WallSec14", glm::vec3(6.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_15 = GameObject("WallSec15", glm::vec3(8.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_16 = GameObject("WallSec16", glm::vec3(9.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_17 = GameObject("WallSec17", glm::vec3(12.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_18 = GameObject("WallSec18", glm::vec3(14.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_19 = GameObject("WallSec19", glm::vec3(15.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_20 = GameObject("WallSec20", glm::vec3(19.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_21 = GameObject("WallSec21", glm::vec3(20.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+
+    scene_1.SceneList.push_back(&wallSec_1);
+    scene_1.SceneList.push_back(&wallSec_2);
+    scene_1.SceneList.push_back(&wallSec_3);
+    scene_1.SceneList.push_back(&wallSec_4);
+    scene_1.SceneList.push_back(&wallSec_5);
+    scene_1.SceneList.push_back(&wallSec_6);
+    scene_1.SceneList.push_back(&wallSec_7);
+    scene_1.SceneList.push_back(&wallSec_8);
+    scene_1.SceneList.push_back(&wallSec_9);
+
+    scene_1.SceneList.push_back(&wallSec_10);
+    scene_1.SceneList.push_back(&wallSec_11);
+    scene_1.SceneList.push_back(&wallSec_12);
+    scene_1.SceneList.push_back(&wallSec_13);
+    scene_1.SceneList.push_back(&wallSec_14);
+    scene_1.SceneList.push_back(&wallSec_15);
+    scene_1.SceneList.push_back(&wallSec_16);
+    scene_1.SceneList.push_back(&wallSec_17);
+    scene_1.SceneList.push_back(&wallSec_18);
+    scene_1.SceneList.push_back(&wallSec_19);
+    scene_1.SceneList.push_back(&wallSec_20);
+    scene_1.SceneList.push_back(&wallSec_21);
+#pragma endregion
+
+    GameObject enemyFactory = GameObject("Enemy_Factory", glm::vec3(8.0f, 0.5f, 11.0f), glm::vec3(3.0f, 1.0f, 4.0f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Factory, GameObject::Team::Enemy);
+    GameObject enemyBarrack = GameObject("Enemy_Barrack", glm::vec3(14.0f, 0.5f, 4.0f), glm::vec3(2.0f, 1.0f, 3.0f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
+
+    scene_1.SceneList.push_back(&enemyFactory);
+    scene_1.SceneList.push_back(&enemyBarrack);
+
+#endif
 
     selManager = SelectionManager::getInstance();
     selManager->selectionColor = RGBConvert(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
@@ -163,7 +240,7 @@ int main()
     createGridVAO();
 
     //Debug
-#ifdef DEBUG
+#if DEBUG == true
     currentMoney = 2000;
 #endif // DEBUG
 
@@ -189,143 +266,128 @@ int main()
         processInput(window);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-        //rendering
-        glm::vec3 bgColor = RGBConvert(68, 135, 201);
-        glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //ImGui
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        //use shader
-        shader.use();
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glm::vec3 direction = glm::vec3(-0.45f, -0.707106f, 0.0f);
-        cameraFront = glm::normalize(direction);
+        if (notPaused) {
+            //rendering
+            glm::vec3 bgColor = RGBConvert(68, 135, 201);
+            glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+            //ImGui
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-        
+            //use shader
+            shader.use();
 
-        //render Objects
-        scene_1.active = true;              //set scene as active
-        if (scene_1.active && enemyMain) {
-            for (GameObject* g : scene_1.SceneList)
-            {
+            glm::vec3 direction = glm::vec3(-0.45f, -0.707106f, 0.0f);
+            cameraFront = glm::normalize(direction);
+
+            projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+
+
+            //render Objects
+            scene_1.active = true;              //set scene as active
+            if (scene_1.active && enemyMainAlive) {
+                for (GameObject* g : scene_1.SceneList)
+                {
 #if DEBUG == true
-                if (debugDrawCubes)
+                    if (debugDrawCubes)
+                        drawCube(shader.ID, g);
+#else
                     drawCube(shader.ID, g);
-#else
-                drawCube(shader.ID, g);
 #endif // DEBUG
 
-                
+
+                }
+                if (placeGhost) {
+                    drawGhostObject(shaderID, &ghostBuilding);
+                }
             }
-            if (placeGhost) {
-                drawGhostObject(shaderID, &ghostBuilding);
-            }
-        }
 
 #if DEBUG == true
-        if (debugDrawCubes)
-            drawPlane(shader.ID, &map);
-        else
-            drawPickingPlane(shaderID, &map);          //debug
+            if (debugDrawCubes)
+                drawPlane(shader.ID, &map);
+            else
+                drawPickingPlane(shaderID, &map);          //debug
 #else
-        drawPlane(shader.ID, &map);
+            drawPlane(shader.ID, &map);
 #endif // DEBUG
-
-
-
-        
 
 
 #pragma region UI content
-        //ImGui UIRight
-        ImGui::Begin("Build UI");
-        ImGui::SetWindowPos(ImVec2(UIright, 0.5f));
-        ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
+            //ImGui UIRight
+            ImGui::Begin("Build UI");
+            ImGui::SetWindowPos(ImVec2(UIright, 0.5f));
+            ImGui::SetWindowSize(ImVec2((screenWidth - UIright), screenHeight));
 
-        ImGui::Text("Money: %d", currentMoney);
-        ImGui::NewLine();
-        if (ImGui::BeginTabBar("tabs")) {
-            if (ImGui::BeginTabItem("Buildings")) {
-                if (ImGui::Button("Barracks\nCost: 300", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    GhostGO gGO = GhostGO("New Barracks", glm::vec3(1.0f, 1.0f, 1.0f), RGBConvert(0,0,100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
-                    ghostBuilding = gGO;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Factory\nCost: 500", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                    GhostGO gGO = GhostGO("New Factory", glm::vec3(2.0f, 1.0f, 2.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
-                    ghostBuilding = gGO;
-                }
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Units")) {
-                if (ImGui::Button("FootSoldier\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    if (barracksBuild){
-                        BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
-                        buildRequests.push_back(b);
+            ImGui::Text("Money: %d", currentMoney);
+            ImGui::NewLine();
+            if (ImGui::BeginTabBar("tabs")) {
+                if (ImGui::BeginTabItem("Buildings")) {
+                    if (ImGui::Button("Barracks\nCost: 300", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                        GhostGO gGO = GhostGO("New Barracks", glm::vec3(2.0f, 1.0f, 3.0f), RGBConvert(0, 0, 100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
+                        ghostBuilding = gGO;
                     }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Scout\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    if (barracksBuild) {
-                        BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
-                        buildRequests.push_back(b);
+                    ImGui::SameLine();
+                    if (ImGui::Button("Factory\nCost: 500", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                        GhostGO gGO = GhostGO("New Factory", glm::vec3(3.0f, 1.0f, 4.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
+                        ghostBuilding = gGO;
                     }
+                    ImGui::EndTabItem();
                 }
-
-                ImGui::NewLine();
-                if (ImGui::Button("HeavyTank\nCost: 220", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    if (factoryBuild) {
-                        BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
-                        buildRequests.push_back(b);
-                    }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("LightTank\nCost: 170", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                    if (factoryBuild) {
-                        BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
-                        buildRequests.push_back(b);
-                    }
-                }
-
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-        ImGui::End();
-
-        //BottomUI
-        if (selManager->selection.size() > 0) {
-            ImGui::Begin("Selection UI");
-            ImGui::SetWindowPos(ImVec2(0, UIbottom));
-            ImGui::SetWindowSize(ImVec2((screenWidth - (screenWidth * UIpercentageRight)), (screenHeight - UIbottom)));
-
-            std::list<int> checkedtypes;
-            std::list<GameObject*> newSel;
-            for (GameObject* selected : selManager->selection) {
-                ImGui::SameLine();
-                if (checkedtypes.size() == 0) {
-                    checkedtypes.push_back((int)selected->type);
-                    if (ImGui::Button(selected->type_tostring((int)selected->type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
-                        for (GameObject* withType : selManager->selection) {
-                            if (withType->type == selected->type) {
-                                newSel.push_back(withType);
-                            }
+                if (ImGui::BeginTabItem("Units")) {
+                    if (ImGui::Button("FootSoldier\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                        if (barracksBuild) {
+                            BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
+                            buildRequests.push_back(b);
                         }
-                        break;
                     }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Scout\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                        if (barracksBuild) {
+                            BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
+                            buildRequests.push_back(b);
+                        }
+                    }
+
+                    ImGui::NewLine();
+                    if (ImGui::Button("HeavyTank\nCost: 220", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                        if (factoryBuild) {
+                            BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
+                            buildRequests.push_back(b);
+                        }
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("LightTank\nCost: 170", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
+                        if (factoryBuild) {
+                            BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
+                            buildRequests.push_back(b);
+                        }
+                    }
+
+                    ImGui::EndTabItem();
                 }
-                for (int i : checkedtypes) {
-                    if (i != (int)selected->type) {
+                ImGui::EndTabBar();
+            }
+            ImGui::End();
+
+            //BottomUI
+            if (selManager->selection.size() > 0) {
+                ImGui::Begin("Selection UI");
+                ImGui::SetWindowPos(ImVec2(0, UIbottom));
+                ImGui::SetWindowSize(ImVec2((screenWidth - (screenWidth * UIpercentageRight)), (screenHeight - UIbottom)));
+
+                std::list<int> checkedtypes;
+                std::list<GameObject*> newSel;
+                for (GameObject* selected : selManager->selection) {
+                    ImGui::SameLine();
+                    if (checkedtypes.size() == 0) {
                         checkedtypes.push_back((int)selected->type);
                         if (ImGui::Button(selected->type_tostring((int)selected->type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
                             for (GameObject* withType : selManager->selection) {
@@ -336,119 +398,134 @@ int main()
                             break;
                         }
                     }
+                    for (int i : checkedtypes) {
+                        if (i != (int)selected->type) {
+                            checkedtypes.push_back((int)selected->type);
+                            if (ImGui::Button(selected->type_tostring((int)selected->type), ImVec2((screenWidth - UIright) * 0.35, (screenHeight - UIbottom) * 0.35))) {
+                                for (GameObject* withType : selManager->selection) {
+                                    if (withType->type == selected->type) {
+                                        newSel.push_back(withType);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (newSel.size() > 0) {                //if a new Selection is done by the buttons
+                    selManager->setSelection(newSel);
+                }
+
+                ImGui::End();
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#pragma endregion
+
+            //camera
+            glm::vec3 camerPos = glm::vec3(0.0f, 0.0f, 3.0f);
+            glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+            glm::vec3 cameraDirection = glm::normalize(camerPos - cameraTarget);
+
+            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+            glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+            int projectloc = glGetUniformLocation(shader.ID, "projection");
+            glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
+            int viewloc = glGetUniformLocation(shader.ID, "view");
+            glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
+
+            //moveCamera with Mouseposition
+            if (moveCam) {
+                double x, y;
+                glfwGetCursorPos(window, &x, &y);
+                if (y < screenUp)
+                    moveCamera(Direction::forward);
+                if (y > screenDown)
+                    moveCamera(Direction::back);
+                if (x > screenRight)
+                    moveCamera(Direction::right);
+                if (x < screenLeft)
+                    moveCamera(Direction::left);
+            }
+
+            if (timeSinceNewMoney >= timeTillNewMoney) {            //try to add money to account
+                addMoney();
+                enemyManager.addMoney(deltaTime);
+                timeSinceNewMoney = 0.0f;
+            }
+            else
+                timeSinceNewMoney += deltaTime;
+
+            if (moveRequest.size() > 0) {                           //move Units
+                for (PathRequest* pr : moveRequest) {
+                    if (pr->moving) {
+                        if(pr->moveGO->team == GameObject::Team::Player)
+                            drawLine(pr);
+                        pr->move(deltaTime);
+                        if (!pr->moving) {
+                            moveRequest.remove(pr);
+                            map.updateGrid(&scene_1.SceneList);
+                            break;
+                        }
+                    }
                 }
             }
-            if (newSel.size() > 0) {                //if a new Selection is done by the buttons
-                selManager->setSelection(newSel);
-            }
 
-            ImGui::End();
-        }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#pragma endregion
-        
-        //camera
-        glm::vec3 camerPos = glm::vec3(0.0f, 0.0f, 3.0f);
-        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 cameraDirection = glm::normalize(camerPos - cameraTarget);
-
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
-        int projectloc = glGetUniformLocation(shader.ID, "projection");
-        glUniformMatrix4fv(projectloc, 1, GL_FALSE, glm::value_ptr(projection));
-        int viewloc = glGetUniformLocation(shader.ID, "view");
-        glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(view));
-
-        //moveCamera with Mouseposition
-        if(moveCam) {
-            double x, y;
-            glfwGetCursorPos(window, &x, &y);
-            if (y < screenUp)
-                moveCamera(Direction::forward);
-            if (y > screenDown)
-                moveCamera(Direction::back);
-            if (x > screenRight)
-                moveCamera(Direction::right);
-            if (x < screenLeft)
-                moveCamera(Direction::left);
-        }
-
-        if (timeSinceNewMoney >= timeTillNewMoney) {            //try to add money to account
-            addMoney();
-            timeSinceNewMoney = 0.0f;
-        }
-        else
-            timeSinceNewMoney += deltaTime;
-
-        if (moveRequest.size() > 0) {                           //move Units
-            for (PathRequest* pr : moveRequest) {
-                if (pr->moving) {
-                    drawLine(pr);
-                    pr->move(deltaTime);
-                    if (!pr->moving) {
-                        moveRequest.remove(pr);
+            if (attackList.size() > 0) {                    //attack Units
+                for (AttackRequest* atk : attackList) {
+                    drawLine(atk);
+                    int r = atk->attack(deltaTime);                 // 1 = target didnt die or not attacked (time), 0 = any unit was destroyed, 2 = Enemy main Building destroyed, 3 = Player Main destroyed
+                    if (r == 1)
+                        continue;
+                    else if (r == 0) {
+                        GameObject::removeObject(&scene_1.SceneList, atk->def);
+                        attackList.remove(atk);
+                        map.updateGrid(&scene_1.SceneList);
+                        break;
+                    }
+                    else if (r == 2) {
+                        std::cout << "Enemy Main Building Destroyed\nYou Win" << std::endl;
+                        GameObject::removeObject(&scene_1.SceneList, atk->def);
+                        attackList.remove(atk);
+                        map.updateGrid(&scene_1.SceneList);
+                        break;
+                    }
+                    else if (r == 3) {
+                        std::cout << "Player Main Building Destroyed\nYou Loose" << std::endl;
+                        GameObject::removeObject(&scene_1.SceneList, atk->def);
+                        attackList.remove(atk);
                         map.updateGrid(&scene_1.SceneList);
                         break;
                     }
                 }
             }
-        }
 
-        if (attackList.size() > 0) {                    //attack Units
-            for (AttackRequest* atk : attackList) {
-                drawLine(atk);
-                int r = atk->attack(deltaTime);                 // 1 = target didnt die or not attacked (time), 0 = any unit was destroyed, 2 = Enemy main Building destroyed, 3 = Player Main destroyed
-                if (r == 1)
-                    continue;
-                else if(r == 0) {
-                    GameObject::removeObject(&scene_1.SceneList, atk->def);
-                    attackList.remove(atk);
-                    map.updateGrid(&scene_1.SceneList);
-                    break;
-                }
-                else if (r == 2) {
-                    std::cout << "Enemy Main Building Destroyed\nYou Win" << std::endl;
-                    GameObject::removeObject(&scene_1.SceneList, atk->def);
-                    attackList.remove(atk);
-                    map.updateGrid(&scene_1.SceneList);
-                    break;
-                }
-                else if (r == 3) {
-                    std::cout << "Player Main Building Destroyed\nYou Loose" << std::endl;
-                    GameObject::removeObject(&scene_1.SceneList, atk->def);
-                    attackList.remove(atk);
-                    map.updateGrid(&scene_1.SceneList);
-                    break;
-                }
-            }
-        }
-
-        if (buildRequests.size() > 0) {                     //handle Build requests
-            for (BuildRequest* br : buildRequests) {
-                if (!br->handled) {
-                    if(currentMoney >= br->parent->u->cost)
-                        br->build(&scene_1, &deltaTime);
+            if (buildRequests.size() > 0) {                     //handle Build requests
+                for (BuildRequest* br : buildRequests) {
+                    if (!br->handled) {
+                        if (currentMoney >= br->parent->u->cost)
+                            br->build(&scene_1, &deltaTime);
+                        else {
+                            std::cout << "Not enough money\n";
+                        }
+                    }
                     else {
-                        std::cout << "Not enough money\n";
+                        reduceMoney(br->parent->u->cost);
+                        map.updateGrid(&scene_1.SceneList);
+                        buildRequests.remove(br);
+                        break;
                     }
                 }
-                else {
-                    reduceMoney(br->parent->u->cost);
-                    map.updateGrid(&scene_1.SceneList);
-                    buildRequests.remove(br);
-                    break;
-                }
             }
+            //check events and swap buffers
+            glfwSwapBuffers(window);
         }
-
-        //check events and swap buffers
-        glfwSwapBuffers(window);
+        
         glfwPollEvents();                                       //check for any event happening in the window, e.g input
     }
 
@@ -570,6 +647,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     }
 
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        notPaused = !notPaused;
+    }
+
     //DEBUG
 #if DEBUG == true
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
@@ -578,22 +659,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 #endif // DEBUG
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {  
-    if (ypos < screenUp || ypos > screenDown || xpos > screenRight || xpos < screenLeft)
-        moveCam = true;
-    else
-        moveCam = false;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) { 
+    if (notPaused) {
+        if (ypos < screenUp || ypos > screenDown || xpos > screenRight || xpos < screenLeft)
+            moveCam = true;
+        else
+            moveCam = false;
 
-    if (ghostBuilding.name != "") {
-        ghostPosition(window, &ghostBuilding, &map);
-        placeGhost = true;
+        if (ghostBuilding.name != "") {
+            ghostPosition(window, &ghostBuilding, &map);
+            placeGhost = true;
+        }
     }
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     double pixelX = 1, pixelY = 1;
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE && notPaused) {
         //Selection
         if (ghostBuilding.name == "") {
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -693,13 +776,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (ghostBuilding.name != "") {
             if (ghostBuilding.tmp_position.y != -10) {
                 GameObject* ghostToGo = ghostBuilding.placeGhost();
-                if (glm::distance(ghostToGo->position, mainBuilding->position) < MainBuilding::range) {
+                if (glm::distance(ghostToGo->position, playerMainBuilding->position) < MainBuilding::range) {
                     if (reduceMoney(ghostToGo->u->cost)) {
                         ghostBuilding = GhostGO();
                         placeGhost = false;
                         scene_1.SceneList.push_back(ghostToGo);
                         map.updateGrid(&scene_1.SceneList);
                         MainBuilding::extendRange();
+                        std::cout << ghostToGo->position << '\n';
 
                         if (ghostToGo->type == GameObject::GameObjectType::Barracks) {
                             barrack = ghostToGo;
@@ -717,12 +801,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         }
     }
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && notPaused) {
         glfwGetCursorPos(window, &xPress, &yPress);
         yPress = screenHeight - yPress;
     }
 
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE && notPaused) {
         if (ghostBuilding.name != "") {
             placeGhost = false;
             ghostBuilding = GhostGO();

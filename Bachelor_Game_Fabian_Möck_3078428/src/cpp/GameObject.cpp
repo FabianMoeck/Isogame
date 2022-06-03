@@ -62,6 +62,8 @@ void GameObject::initType(std::string _name, Team _team, int _type) {
         u = new Barracks(_name, _team, _type); break;
     case GameObjectType::Factory:
         u = new Factory(_name, _team, _type); break;
+    case GameObjectType::Wall:
+        u = new Wall(_name, _team, _type); break;
     default:
         break;
     }

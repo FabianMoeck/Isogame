@@ -5,6 +5,7 @@
 #include "src/Headers/Units/MainBuilding.h"
 #include "src/Headers/Units/Barracks.h"
 #include "src/Headers/Units/Factory.h"
+#include "src/Headers/Units/Wall.h"
 
 //Units
 #include "src/Headers/Units/FootSoldier.h"

@@ -19,7 +19,7 @@ HeavyTank::~HeavyTank()
 }
 
 void HeavyTank::onInit() {
-
+	std::cout << "New " << name << " HT produced" << '\n';
 }
 
 void HeavyTank::onHit() {

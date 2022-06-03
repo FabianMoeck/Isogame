@@ -16,6 +16,8 @@ public:
 	
 	void build(Scene *scene, float *deltaTime);
 
+	GameObject* getData();
+
 private:
 	GameObject* data;
 	float timeBuilding = 0;
