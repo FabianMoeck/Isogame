@@ -339,6 +339,11 @@ int main()
                         GhostGO gGO = GhostGO("New Factory", glm::vec3(3.0f, 1.0f, 4.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
                         ghostBuilding = gGO;
                     }
+                    ImGui::NewLine();
+                    if (ImGui::Button("Wall\nCost: 80", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
+                        GhostGO gGO = GhostGO("New Wall", glm::vec3(0.5f, 0.5f, 1.5f), RGBConvert(138, 138, 138), false, GameObject::GameObjectType::Wall, GameObject::Team::Player);
+                        ghostBuilding = gGO;
+                    }
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Units")) {
@@ -637,13 +642,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (key == GLFW_KEY_Q && action != GLFW_RELEASE) {
         if (ghostBuilding.name != "") {
-            ghostBuilding.rotate(-30 * (1 - deltaTime));
+            ghostBuilding.rotate(-30);
         }
     }
 
     if (key == GLFW_KEY_E && action != GLFW_PRESS) {
         if (ghostBuilding.name != "") {
-            ghostBuilding.rotate(30 * (1 - deltaTime));
+            ghostBuilding.rotate(30);
         }
     }
 
