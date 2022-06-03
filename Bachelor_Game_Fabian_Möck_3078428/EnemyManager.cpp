@@ -60,7 +60,6 @@ void EnemyManager::startProduce() {
 }
 
 void EnemyManager::attackPlayer() {
-	std::cout << "attack";
 	for (GameObject* g : currentUnits) {
 		GameObject* target = getRandomPlayerUnit();
 		ITroop *t = (ITroop*)g->u;
@@ -74,7 +73,6 @@ void EnemyManager::attackPlayer() {
 			move_list->push_back(p);
 		}
 	}
-	currentMoney = 0;
 	currentUnits.clear();
 }
 

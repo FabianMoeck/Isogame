@@ -28,12 +28,12 @@ private:
 	GameObject* factory = nullptr;
 	GameObject* barrack = nullptr;
 
-	int currentMoney = 2500;
+	int currentMoney = 1500;
 	float gatherSpeed = 1.5f;
-	int gatherAmount = 50;
+	int gatherAmount = 30;
 	float timeSinceLastAdd = 0.0f;
 
-	int maxMoney = 3000;
+	int maxMoney = 5000;
 	int unitAttackCount = 2;
 	int minMoney = 200;
 
