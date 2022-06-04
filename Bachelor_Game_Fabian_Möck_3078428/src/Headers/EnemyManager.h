@@ -2,11 +2,11 @@
 #define ENEMY_MANAGER_H
 
 #include <list>
-#include "src/Headers/GameObject.h"
-#include "src/Headers/Requests/AttackRequest.h"
-#include "src/Headers/Requests/BuildRequest.h"
-#include "src/Headers/Pathfinding/PathRequest.h"
-#include "src/Headers/Scene.h"
+#include "GameObject.h"
+#include "Requests/AttackRequest.h"
+#include "Requests/BuildRequest.h"
+#include "Pathfinding/PathRequest.h"
+#include "Scene.h"
 
 class EnemyManager
 {
@@ -34,7 +34,7 @@ private:
 	float timeSinceLastAdd = 0.0f;
 
 	int maxMoney = 5000;
-	int unitAttackCount = 2;
+	int unitAttackCount = 10;
 	int minMoney = 200;
 
 	std::list<GameObject*> currentUnits;

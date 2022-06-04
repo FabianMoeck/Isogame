@@ -153,7 +153,7 @@
     <ClCompile Include="..\Dependencies\IMGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\Dependencies\IMGUI\imgui_tables.cpp" />
     <ClCompile Include="..\Dependencies\IMGUI\imgui_widgets.cpp" />
-    <ClCompile Include="EnemyManager.cpp" />
+    <ClCompile Include="src\cpp\EnemyManager.cpp" />
     <ClCompile Include="src\cpp\Requests\AttackRequest.cpp" />
     <ClCompile Include="src\cpp\Units\Barracks.cpp" />
     <ClCompile Include="src\cpp\Units\Building.cpp" />
@@ -187,7 +187,7 @@
     <ClInclude Include="..\Dependencies\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="..\Dependencies\IMGUI\imstb_textedit.h" />
     <ClInclude Include="..\Dependencies\IMGUI\imstb_truetype.h" />
-    <ClInclude Include="EnemyManager.h" />
+    <ClInclude Include="src\Headers\EnemyManager.h" />
     <ClInclude Include="src\Headers\Requests\AttackRequest.h" />
     <ClInclude Include="src\Headers\Units\Barracks.h" />
     <ClInclude Include="src\Headers\Units\Building.h" />
@@ -203,7 +203,6 @@
     <ClInclude Include="src\Headers\Pathfinding\Pathfinding.h" />
     <ClInclude Include="src\Headers\Pathfinding\PathRequest.h" />
     <ClInclude Include="src\Headers\Units\Scout.h" />
-    <ClInclude Include="src\Headers\Camera.h" />
     <ClInclude Include="src\Headers\GameObject.h" />
     <ClInclude Include="src\Headers\ghostGameObject.h" />
     <ClInclude Include="src\Headers\Map.h" />

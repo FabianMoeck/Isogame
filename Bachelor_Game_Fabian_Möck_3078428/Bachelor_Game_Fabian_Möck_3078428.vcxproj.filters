@@ -22,9 +22,6 @@
     <Filter Include="Header Files\Shader">
       <UniqueIdentifier>{a00eeb49-ce6b-4082-a2be-ded5c4e59f78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Camera">
-      <UniqueIdentifier>{6ea4a2e9-61f0-4e88-8068-5853ff185099}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\IMGUI">
       <UniqueIdentifier>{ed56fee0-f073-4565-bab3-37775ca9fe23}</UniqueIdentifier>
     </Filter>
@@ -153,7 +150,7 @@
     <ClCompile Include="src\cpp\Units\Wall.cpp">
       <Filter>Source Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyManager.cpp">
+    <ClCompile Include="src\cpp\EnemyManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,9 +166,6 @@
     </ClInclude>
     <ClInclude Include="src\Headers\GameObject.h">
       <Filter>Header Files\GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Headers\Camera.h">
-      <Filter>Header Files\Camera</Filter>
     </ClInclude>
     <ClInclude Include="..\Dependencies\IMGUI\imgui_impl_opengl3_loader.h">
       <Filter>Header Files\IMGUI</Filter>
@@ -260,7 +254,7 @@
     <ClInclude Include="src\Headers\Units\Wall.h">
       <Filter>Header Files\GameObjects\Units/Buildings\Buildings</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyManager.h">
+    <ClInclude Include="src\Headers\EnemyManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

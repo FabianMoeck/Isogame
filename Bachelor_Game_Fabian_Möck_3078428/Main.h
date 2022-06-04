@@ -21,6 +21,7 @@
 #include "src/Headers/Pathfinding/PathRequest.h"
 #include "src/Headers/Requests/AttackRequest.h"
 #include "src/Headers/Requests/BuildRequest.h"
+#include "src/Headers/EnemyManager.h"
 
 
 std::ostream& operator<<(std::ostream& os, const glm::vec3 vec);

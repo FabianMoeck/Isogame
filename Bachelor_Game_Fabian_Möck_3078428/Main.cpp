@@ -13,8 +13,6 @@ bool debugDrawCubes = true;
 #endif // DEBUG
 
 //work in Porgress
-#include "EnemyManager.h"
-EnemyManager enemyManager;
 
 #pragma region Variables
 //Screen
@@ -47,6 +45,7 @@ float MainBuilding::range{ 6.5f };
 GameObject* playerMainBuilding;
 
 bool enemyMainAlive = true;
+EnemyManager enemyManager;
 
 //Pathfinding
 std::list<PathRequest*> moveRequest;
@@ -160,37 +159,37 @@ int main()
     enemyManager = EnemyManager(&attackList, &buildRequests, &moveRequest, &cube5, &cube2, &scene_1, &pathFinding);
 #else
     //Player Main Building
-    GameObject playerMain = GameObject("Player_Main", glm::vec3(38.0f, 0.5f, 41.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(247, 202, 22), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
+    GameObject playerMain = GameObject("Player_Main", glm::vec3(38.0f, 0.5f, 41.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(4, 96, 189), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
     scene_1.SceneList.push_back(&playerMain);
     playerMainBuilding = &playerMain;
 
     //Enemy Base
-    GameObject enemyMain = GameObject("Enemy_Main", glm::vec3(4.0f, 0.5f, 4.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(1,1,1), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
+    GameObject enemyMain = GameObject("Enemy_Main", glm::vec3(4.0f, 0.5f, 4.0f), glm::vec3(1.5f, 1.0f, 1.5f), 0.0f, RGBConvert(158, 13, 22), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
     scene_1.SceneList.push_back(&enemyMain);
 
 #pragma region Wall
-    GameObject wallSec_1 = GameObject("WallSec1", glm::vec3(21.0f, 1.0f, 0.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_2 = GameObject("WallSec2", glm::vec3(21.0f, 1.0f, 2.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_3 = GameObject("WallSec3", glm::vec3(21.0f, 1.0f, 3.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_4 = GameObject("WallSec4", glm::vec3(21.0f, 1.0f, 5.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_5 = GameObject("WallSec5", glm::vec3(21.0f, 1.0f, 6.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_6 = GameObject("WallSec6", glm::vec3(21.0f, 1.0f, 8.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_7 = GameObject("WallSec7", glm::vec3(21.0f, 1.0f, 9.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_8 = GameObject("WallSec8", glm::vec3(21.0f, 1.0f, 14.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_9 = GameObject("WallSec9", glm::vec3(21.0f, 1.0f, 15.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_1 = GameObject("WallSec1", glm::vec3(21.0f, 1.0f, 0.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_2 = GameObject("WallSec2", glm::vec3(21.0f, 1.0f, 2.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_3 = GameObject("WallSec3", glm::vec3(21.0f, 1.0f, 3.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_4 = GameObject("WallSec4", glm::vec3(21.0f, 1.0f, 5.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_5 = GameObject("WallSec5", glm::vec3(21.0f, 1.0f, 6.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_6 = GameObject("WallSec6", glm::vec3(21.0f, 1.0f, 8.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_7 = GameObject("WallSec7", glm::vec3(21.0f, 1.0f, 9.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_8 = GameObject("WallSec8", glm::vec3(21.0f, 1.0f, 14.0f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_9 = GameObject("WallSec9", glm::vec3(21.0f, 1.0f, 15.5f), glm::vec3(0.5f, 0.5f, 1.5f), 0.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
 
-    GameObject wallSec_10 = GameObject("WallSec10", glm::vec3(0.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_11 = GameObject("WallSec11", glm::vec3(2.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_12 = GameObject("WallSec12", glm::vec3(3.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_13 = GameObject("WallSec13", glm::vec3(5.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_14 = GameObject("WallSec14", glm::vec3(6.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_15 = GameObject("WallSec15", glm::vec3(8.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_16 = GameObject("WallSec16", glm::vec3(9.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_17 = GameObject("WallSec17", glm::vec3(12.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_18 = GameObject("WallSec18", glm::vec3(14.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_19 = GameObject("WallSec19", glm::vec3(15.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_20 = GameObject("WallSec20", glm::vec3(19.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
-    GameObject wallSec_21 = GameObject("WallSec21", glm::vec3(20.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_10 = GameObject("WallSec10", glm::vec3(0.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_11 = GameObject("WallSec11", glm::vec3(2.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_12 = GameObject("WallSec12", glm::vec3(3.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_13 = GameObject("WallSec13", glm::vec3(5.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_14 = GameObject("WallSec14", glm::vec3(6.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_15 = GameObject("WallSec15", glm::vec3(8.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_16 = GameObject("WallSec16", glm::vec3(9.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_17 = GameObject("WallSec17", glm::vec3(12.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_18 = GameObject("WallSec18", glm::vec3(14.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_19 = GameObject("WallSec19", glm::vec3(15.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_20 = GameObject("WallSec20", glm::vec3(19.0f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
+    GameObject wallSec_21 = GameObject("WallSec21", glm::vec3(20.5f, 1.0f, 16.5f), glm::vec3(0.5f, 0.5f, 1.5f), 90.0f, RGBConvert(245, 100, 110), false, GameObject::GameObjectType::Wall, GameObject::Team::Enemy);
 
     scene_1.SceneList.push_back(&wallSec_1);
     scene_1.SceneList.push_back(&wallSec_2);
@@ -216,12 +215,62 @@ int main()
     scene_1.SceneList.push_back(&wallSec_21);
 #pragma endregion
 
-    GameObject enemyFactory = GameObject("Enemy_Factory", glm::vec3(8.0f, 0.5f, 11.0f), glm::vec3(3.0f, 1.0f, 4.0f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Factory, GameObject::Team::Enemy);
-    GameObject enemyBarrack = GameObject("Enemy_Barrack", glm::vec3(14.0f, 0.5f, 4.0f), glm::vec3(2.0f, 1.0f, 3.0f), 90.0f, RGBConvert(1, 1, 1), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
+    GameObject enemyFactory = GameObject("Enemy_Factory", glm::vec3(8.0f, 0.5f, 11.0f), glm::vec3(3.0f, 1.0f, 4.0f), 90.0f, RGBConvert(209, 50, 60), false, GameObject::GameObjectType::Factory, GameObject::Team::Enemy);
+    GameObject enemyBarrack = GameObject("Enemy_Barrack", glm::vec3(14.0f, 0.5f, 4.0f), glm::vec3(2.0f, 1.0f, 3.0f), 90.0f, RGBConvert(107, 17, 23), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
 
     scene_1.SceneList.push_back(&enemyFactory);
     scene_1.SceneList.push_back(&enemyBarrack);
 
+    //enemy start Units
+    GameObject eFS_1 = GameObject("Enemy_FS", glm::vec3(15.0f, 0.5f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(230, 18, 64), false, GameObject::GameObjectType::FootSoldier, GameObject::Team::Enemy);
+    GameObject eFS_2 = GameObject("Enemy_FS", glm::vec3(19.0f, 0.5f, 12.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(230, 18, 64), false, GameObject::GameObjectType::FootSoldier, GameObject::Team::Enemy);
+
+    GameObject eHT_1 = GameObject("Enemy_HT", glm::vec3(18.0f, 0.5f, 14.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(176, 11, 60), false, GameObject::GameObjectType::HeavyTank, GameObject::Team::Enemy);
+    GameObject eHT_2 = GameObject("Enemy_HT", glm::vec3(12.0f, 0.5f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(176, 11, 60), false, GameObject::GameObjectType::HeavyTank, GameObject::Team::Enemy);
+
+    GameObject eLT_1 = GameObject("Enemy_LT", glm::vec3(16.0f, 0.5f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(156, 19, 9), false, GameObject::GameObjectType::LightTank, GameObject::Team::Enemy);
+    GameObject eLT_2 = GameObject("Enemy_LT", glm::vec3(10.0f, 0.5f, 14.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(156, 19, 9), false, GameObject::GameObjectType::LightTank, GameObject::Team::Enemy);
+
+    scene_1.SceneList.push_back(&eFS_1);
+    scene_1.SceneList.push_back(&eFS_2);
+    scene_1.SceneList.push_back(&eHT_1);
+    scene_1.SceneList.push_back(&eHT_2);
+    scene_1.SceneList.push_back(&eLT_1);
+    scene_1.SceneList.push_back(&eLT_2);
+
+    //enviroment
+#pragma region Neutral obstacles
+    GameObject n_1 = GameObject("Neutral", glm::vec3(40.0f, 0.5f, 30.0f), glm::vec3(4.0f, 1.0f, 3.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_2 = GameObject("Neutral", glm::vec3(35.0f, 0.5f, 25.0f), glm::vec3(2.0f, 1.0f, 4.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_3 = GameObject("Neutral", glm::vec3(33.0f, 0.5f, 23.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_4 = GameObject("Neutral", glm::vec3(16.0f, 0.5f, 26.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_5 = GameObject("Neutral", glm::vec3(23.0f, 0.5f, 41.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_6 = GameObject("Neutral", glm::vec3(25.0f, 0.5f, 37.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_7 = GameObject("Neutral", glm::vec3(26.0f, 0.5f, 25.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_8 = GameObject("Neutral", glm::vec3(26.0f, 0.5f, 25.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_9 = GameObject("Neutral", glm::vec3(26.0f, 0.5f, 23.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_10 = GameObject("Neutral", glm::vec3(19.0f, 0.5f, 31.0f), glm::vec3(6.0f, 1.0f, 2.0f), 180.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_11 = GameObject("Neutral", glm::vec3(13.0f, 0.5f, 38.0f), glm::vec3(3.0f, 1.0f, 4.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_12 = GameObject("Neutral", glm::vec3(18.0f, 0.5f, 35.0f), glm::vec3(6.0f, 1.0f, 6.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_13 = GameObject("Neutral", glm::vec3(22.0f, 0.5f, 34.0f), glm::vec3(2.0f, 1.0f, 4.0f), 180.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+    GameObject n_14 = GameObject("Neutral", glm::vec3(14.0f, 0.5f, 35.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(135, 71, 1), false, GameObject::GameObjectType::Wall, GameObject::Team::Neutral);
+
+
+    scene_1.SceneList.push_back(&n_1);
+    scene_1.SceneList.push_back(&n_2);
+    scene_1.SceneList.push_back(&n_3);
+    scene_1.SceneList.push_back(&n_4);
+    scene_1.SceneList.push_back(&n_5);
+    scene_1.SceneList.push_back(&n_6);
+    scene_1.SceneList.push_back(&n_7);
+    scene_1.SceneList.push_back(&n_8);
+    scene_1.SceneList.push_back(&n_9);
+    scene_1.SceneList.push_back(&n_10);
+    scene_1.SceneList.push_back(&n_11);
+    scene_1.SceneList.push_back(&n_12);
+    scene_1.SceneList.push_back(&n_13);
+    scene_1.SceneList.push_back(&n_14);
+#pragma endregion
 #endif
 
     selManager = SelectionManager::getInstance();
@@ -302,8 +351,6 @@ int main()
 #else
                     drawCube(shader.ID, g);
 #endif // DEBUG
-
-
                 }
                 if (placeGhost) {
                     drawGhostObject(shaderID, &ghostBuilding);
@@ -314,11 +361,10 @@ int main()
             if (debugDrawCubes)
                 drawPlane(shader.ID, &map);
             else
-                drawPickingPlane(shaderID, &map);          //debug
+                drawPickingPlane(shaderID, &map);
 #else
             drawPlane(shader.ID, &map);
 #endif // DEBUG
-
 
 #pragma region UI content
             //ImGui UIRight
@@ -331,17 +377,17 @@ int main()
             if (ImGui::BeginTabBar("tabs")) {
                 if (ImGui::BeginTabItem("Buildings")) {
                     if (ImGui::Button("Barracks\nCost: 300", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
-                        GhostGO gGO = GhostGO("New Barracks", glm::vec3(2.0f, 1.0f, 3.0f), RGBConvert(0, 0, 100), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
+                        GhostGO gGO = GhostGO("New Barracks", glm::vec3(2.0f, 1.0f, 3.0f), RGBConvert(5, 10, 163), false, GameObject::GameObjectType::Barracks, GameObject::Team::Player);
                         ghostBuilding = gGO;
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Factory\nCost: 500", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                        GhostGO gGO = GhostGO("New Factory", glm::vec3(3.0f, 1.0f, 4.0f), RGBConvert(113, 0, 138), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
+                        GhostGO gGO = GhostGO("New Factory", glm::vec3(3.0f, 1.0f, 4.0f), RGBConvert(7, 61, 176), false, GameObject::GameObjectType::Factory, GameObject::Team::Player);
                         ghostBuilding = gGO;
                     }
                     ImGui::NewLine();
                     if (ImGui::Button("Wall\nCost: 80", ImVec2((screenWidth - UIright) * 0.45, screenHeight * 0.1))) {
-                        GhostGO gGO = GhostGO("New Wall", glm::vec3(0.5f, 0.5f, 1.5f), RGBConvert(138, 138, 138), false, GameObject::GameObjectType::Wall, GameObject::Team::Player);
+                        GhostGO gGO = GhostGO("New Wall", glm::vec3(0.5f, 0.5f, 1.5f), RGBConvert(3, 7, 130), false, GameObject::GameObjectType::Wall, GameObject::Team::Player);
                         ghostBuilding = gGO;
                     }
                     ImGui::EndTabItem();
@@ -349,14 +395,14 @@ int main()
                 if (ImGui::BeginTabItem("Units")) {
                     if (ImGui::Button("FootSoldier\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                         if (barracksBuild) {
-                            BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
+                            BuildRequest* b = new BuildRequest(barrack, "New FootSoldier", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(5, 200, 235), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
                             buildRequests.push_back(b);
                         }
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Scout\nCost: 100", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                         if (barracksBuild) {
-                            BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(200, 170, 0), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
+                            BuildRequest* b = new BuildRequest(barrack, "New Scout", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(4, 75, 207), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
                             buildRequests.push_back(b);
                         }
                     }
@@ -364,14 +410,14 @@ int main()
                     ImGui::NewLine();
                     if (ImGui::Button("HeavyTank\nCost: 220", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                         if (factoryBuild) {
-                            BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(196, 177, 69), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
+                            BuildRequest* b = new BuildRequest(factory, "New HT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(12, 196, 129), true, GameObject::GameObjectType::HeavyTank, GameObject::Team::Player);
                             buildRequests.push_back(b);
                         }
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("LightTank\nCost: 170", ImVec2((screenWidth - UIright) * 0.45f, screenHeight * 0.1f))) {
                         if (factoryBuild) {
-                            BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(166, 146, 35), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
+                            BuildRequest* b = new BuildRequest(factory, "New LT", glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(8, 209, 176), true, GameObject::GameObjectType::LightTank, GameObject::Team::Player);
                             buildRequests.push_back(b);
                         }
                     }
@@ -515,9 +561,6 @@ int main()
                     if (!br->handled) {
                         if (currentMoney >= br->parent->u->cost)
                             br->build(&scene_1, &deltaTime);
-                        else {
-                            std::cout << "Not enough money\n";
-                        }
                     }
                     else {
                         reduceMoney(br->parent->u->cost);
@@ -527,6 +570,7 @@ int main()
                     }
                 }
             }
+
             //check events and swap buffers
             glfwSwapBuffers(window);
         }
@@ -570,13 +614,13 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
         moveCamera(Direction::forward);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         moveCamera(Direction::back);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
         moveCamera(Direction::left);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
         moveCamera(Direction::right);
 }
 
