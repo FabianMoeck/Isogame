@@ -82,19 +82,12 @@ glm::vec3 PathRequest::findPosition(GameObject* _move, GameObject* _target) {
 	float r = t->range;
 
 	glm::vec3 result = glm::vec3();
-	//std::cout <<"Dist/Rad: "<< glm::distance(_move->position, _target->position) << "/" << r << '\n';
 
 	if (glm::distance(_move->position, _target->position) > r) {
 		glm::vec3 dir = glm::normalize(_move->position - _target->position);
-		//std::cout << "Dir: " << dir.x << "/" << dir.z << '\n';
 		glm::vec3 a = dir * r;
-		//std::cout << "DirScaled: " << a.x << "/" << a.z << '\n';
-
-		//a = glm::abs(a) * 0.2f;
-		//std::cout << "DirABS: " << a.x << "/" << a.z << '\n';
 
 		result = _target->position + a;
-		//std::cout << "Res: " << result.x << "/" << result.z << '\n';
 	}
 	else {
 		result = _target->position;

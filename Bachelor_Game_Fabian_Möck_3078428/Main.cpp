@@ -143,7 +143,7 @@ int main()
     GameObject cube1 = GameObject("TestUnit_1", glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, RGBConvert(247, 202, 22), true, GameObject::GameObjectType::FootSoldier, GameObject::Team::Player);
     GameObject cube2 = GameObject("Enemy_Barracks", glm::vec3(4.0f, 0.0f, 4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), false, GameObject::GameObjectType::Barracks, GameObject::Team::Enemy);
     GameObject cube3 = GameObject("TestUnit_2", glm::vec3(12.0f, 1.0f, 2.0f), glm::vec3(0.5f, 1.0f, 0.5f), 0.0f, RGBConvert(200, 78, 0), false, GameObject::GameObjectType::Wall, GameObject::Team::Ally);
-    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), false, GameObject::GameObjectType::Scout, GameObject::Team::Neutral);
+    GameObject cube4 = GameObject("Cube_Green", glm::vec3(5.0f, 0.0f, 9.0f), glm::vec3(1.0f, 1.0f, 1.0f), 30.0f, RGBConvert(50, 200, 10), true, GameObject::GameObjectType::Scout, GameObject::Team::Player);
     GameObject cube5 = GameObject("Enemy_Main", glm::vec3(15.0f, 0.0f, 19.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(256, 256, 256), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Enemy);
     GameObject cube6 = GameObject("Player_Main", glm::vec3(10.0f, 0.0f, 30.0f), glm::vec3(2.0f, 1.0f, 2.0f), 0.0f, RGBConvert(8, 153, 143), false, GameObject::GameObjectType::MainBuilding, GameObject::Team::Player);
 
@@ -288,7 +288,6 @@ int main()
     createPlaneVAO();
     createGridVAO();
 
-    //Debug
 #if DEBUG == true
     currentMoney = 2000;
 #endif // DEBUG
@@ -337,8 +336,6 @@ int main()
             cameraFront = glm::normalize(direction);
 
             projection = glm::perspective(glm::radians(fov), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
-
-
 
             //render Objects
             scene_1.active = true;              //set scene as active
@@ -782,7 +779,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
             unsigned char* data = new unsigned char[pixelX * pixelY * 4];
 
-            if (yRelease > screenHeight * UIpercentageBottom) {
+            if (yRelease > screenHeight * UIpercentageBottom && !ctrl_Pressed) {
                 selManager->selection.clear();
             }
 
