@@ -11,6 +11,8 @@
 class EnemyManager
 {
 public:
+	int currentMoney = 1500;
+
 	EnemyManager();
 	EnemyManager(std::list<AttackRequest*>* _atk_list, std::list<BuildRequest*>* _build_list, std::list<PathRequest*>* _move_list, GameObject* _factory, GameObject* _barrack, Scene* _currentScene, Pathfinding* _pathfinder);
 	~EnemyManager();
@@ -28,13 +30,12 @@ private:
 	GameObject* factory = nullptr;
 	GameObject* barrack = nullptr;
 
-	int currentMoney = 1500;
 	float gatherSpeed = 1.5f;
 	int gatherAmount = 30;
 	float timeSinceLastAdd = 0.0f;
 
 	int maxMoney = 5000;
-	int unitAttackCount = 10;
+	int unitAttackCount = 8;
 	int minMoney = 200;
 
 	std::list<GameObject*> currentUnits;

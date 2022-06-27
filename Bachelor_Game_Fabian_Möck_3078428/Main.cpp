@@ -1,11 +1,11 @@
 #include "Main.h"
 
-#define INIT_SCREENWIDTH 800                //only initial screensize
-#define INIT_SCREENHEIGTH 600
+#define INIT_SCREENWIDTH 1600                //only initial screensize
+#define INIT_SCREENHEIGTH 900
 
 #define MAPSIZE_X 50
 #define MAPSIZE_Y 50
-#define GRID_MULTI 1               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
+#define GRID_MULTI 2               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
 #define DEBUG true
 #if DEBUG == true
@@ -88,7 +88,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 //UI
-double UIpercentageRight = 0.25;
+double UIpercentageRight = 0.15;
 double UIright = screenWidth - (screenWidth * UIpercentageRight);
 double UIpercentageBottom = 0.15;
 double UIbottom = screenHeight - (screenHeight * UIpercentageBottom);
@@ -270,14 +270,16 @@ int main()
     scene_1.SceneList.push_back(&n_12);
     scene_1.SceneList.push_back(&n_13);
     scene_1.SceneList.push_back(&n_14);
+
+    enemyManager = EnemyManager(&attackList, &buildRequests, &moveRequest, &enemyFactory, &enemyBarrack, &scene_1, &pathFinding);
 #pragma endregion
 #endif
 
     selManager = SelectionManager::getInstance();
-    selManager->selectionColor = RGBConvert(240, 43, 69);                  //set Color that all selections are displayed in (current: Red)
+    selManager->selectionColor = RGBConvert(205, 219, 11);                  //set Color that all selections are displayed in (current: Red)
 
     //Map
-    map = Map(MAPSIZE_X,MAPSIZE_Y, RGBConvert(17.0f, 138.0f, 19.0f), GRID_MULTI);
+    map = Map(MAPSIZE_X,MAPSIZE_Y, RGBConvert(17, 138, 19), GRID_MULTI);
     map.updateGrid(&scene_1.SceneList);
 
     //Pathfinding
@@ -556,11 +558,18 @@ int main()
             if (buildRequests.size() > 0) {                     //handle Build requests
                 for (BuildRequest* br : buildRequests) {
                     if (!br->handled) {
-                        if (currentMoney >= br->parent->u->cost)
-                            br->build(&scene_1, &deltaTime);
+                        if (br->parent->team == GameObject::Team::Player) {
+                            if (currentMoney >= br->parent->u->cost)
+                                br->build(&scene_1, &deltaTime);
+                        }
+                        else if (br->parent->team == GameObject::Team::Enemy) {
+                            if (enemyManager.currentMoney >= br->parent->u->cost)
+                                br->build(&scene_1, &deltaTime);
+                        }
                     }
                     else {
-                        reduceMoney(br->parent->u->cost);
+                        if(br->parent->team == GameObject::Team::Player)
+                            reduceMoney(br->parent->u->cost);
                         map.updateGrid(&scene_1.SceneList);
                         buildRequests.remove(br);
                         break;
@@ -611,13 +620,13 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         moveCamera(Direction::forward);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         moveCamera(Direction::back);
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         moveCamera(Direction::left);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         moveCamera(Direction::right);
 }
 
