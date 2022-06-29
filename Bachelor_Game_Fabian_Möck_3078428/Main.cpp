@@ -7,7 +7,7 @@
 #define MAPSIZE_Y 50
 #define GRID_MULTI 2               //how much each plane part is devided in the grid (10 = 10= Nodes on 1:1 Square)
 
-#define DEBUG true
+#define DEBUG false
 #if DEBUG == true
 bool debugDrawCubes = true;
 #endif // DEBUG
